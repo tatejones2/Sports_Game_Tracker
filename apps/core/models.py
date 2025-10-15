@@ -35,8 +35,9 @@ class League(models.Model):
 class Team(models.Model):
     """Team model."""
     
+    external_id = models.CharField(max_length=50, blank=True, help_text="External API ID for this team")
+    city = models.CharField(max_length=100, blank=True)
     name = models.CharField(max_length=100)
-    city = models.CharField(max_length=100)
     abbreviation = models.CharField(max_length=5)
     league = models.ForeignKey(
         League,
@@ -54,7 +55,14 @@ class Team(models.Model):
         ordering = ['league', 'city', 'name']
         verbose_name = 'Team'
         verbose_name_plural = 'Teams'
-        unique_together = ['league', 'abbreviation']
+        unique_together = [['league', 'abbreviation']]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['league', 'external_id'],
+                name='unique_team_external_id',
+                condition=models.Q(external_id__isnull=False) & ~models.Q(external_id='')
+            )
+        ]
     
     def __str__(self):
         return f"{self.full_name} ({self.abbreviation})"
@@ -97,6 +105,7 @@ class Game(models.Model):
         related_name='games'
     )
     game_date = models.DateTimeField()
+    scheduled_time = models.DateTimeField(null=True, blank=True, help_text="Scheduled start time")
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
@@ -104,6 +113,8 @@ class Game(models.Model):
     )
     home_score = models.IntegerField(default=0)
     away_score = models.IntegerField(default=0)
+    period = models.IntegerField(null=True, blank=True, help_text="Current period/quarter")
+    time_remaining = models.CharField(max_length=20, blank=True, default='', help_text="Time remaining in period")
     external_id = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
