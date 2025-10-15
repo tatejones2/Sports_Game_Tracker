@@ -120,7 +120,7 @@ Sports_Game_Tracker/
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/YOUR_USERNAME/Sports_Game_Tracker.git
+git clone https://github.com/tatejones2/Sports_Game_Tracker.git
 cd Sports_Game_Tracker
 ```
 
@@ -357,8 +357,8 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 📧 Contact
 
 **Project Maintainer**: Tate Jones  
-**GitHub**: [@tatejones](https://github.com/YOUR_USERNAME)  
-**Project Link**: [https://github.com/YOUR_USERNAME/Sports_Game_Tracker](https://github.com/YOUR_USERNAME/Sports_Game_Tracker)
+**GitHub**: [@tatejones2](https://github.com/tatejones2)  
+**Project Link**: [https://github.com/tatejones2/Sports_Game_Tracker](https://github.com/tatejones2/Sports_Game_Tracker)
 
 ---
 
