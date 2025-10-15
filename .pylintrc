@@ -1,0 +1,47 @@
+[MASTER]
+load-plugins=pylint_django
+django-settings-module=config.settings.development
+ignore=migrations,venv,env,.git,__pycache__
+jobs=4
+
+[MESSAGES CONTROL]
+disable=
+    missing-module-docstring,
+    missing-function-docstring,
+    too-few-public-methods,
+    too-many-ancestors,
+    import-outside-toplevel,
+    fixme,
+    duplicate-code
+
+[FORMAT]
+max-line-length=100
+indent-string='    '
+indent-after-paren=4
+
+[DESIGN]
+max-args=7
+max-attributes=10
+max-bool-expr=5
+max-branches=12
+max-locals=15
+max-parents=7
+max-public-methods=20
+max-returns=6
+max-statements=50
+min-public-methods=1
+
+[SIMILARITIES]
+min-similarity-lines=6
+ignore-comments=yes
+ignore-docstrings=yes
+ignore-imports=yes
+
+[BASIC]
+good-names=i,j,k,ex,pk,id,_,setUp,tearDown
+
+[TYPECHECK]
+ignored-classes=objects
+
+[IMPORTS]
+allow-wildcard-with-all=no
