@@ -35,11 +35,11 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_extensions',
     
-    # Local apps (will be created)
-    # 'apps.core',
-    # 'apps.api',
-    # 'apps.data_ingestion',
-    # 'apps.web',
+    # Local apps
+    'apps.core',
+    'apps.api',
+    'apps.data_ingestion',
+    'apps.web',
 ]
 
 MIDDLEWARE = [
