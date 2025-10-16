@@ -127,9 +127,33 @@ REST_FRAMEWORK = {
 # DRF Spectacular (API Documentation)
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Sports Game Tracker API',
-    'DESCRIPTION': 'Professional sports data aggregation platform with live scores for NFL, NBA, MLB',
+    'DESCRIPTION': 'Professional sports data aggregation platform with live scores for NFL, NBA, MLB, NHL, and NCAA sports. '
+                   'Provides real-time game data, scores, team information, and player statistics.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': r'/api/',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'filter': True,
+    },
+    'CONTACT': {
+        'name': 'Sports Game Tracker API Support',
+        'email': 'support@sportsgametracker.com',
+    },
+    'LICENSE': {
+        'name': 'MIT License',
+    },
+    'TAGS': [
+        {'name': 'leagues', 'description': 'Operations for sports leagues (NFL, NBA, MLB, etc.)'},
+        {'name': 'teams', 'description': 'Team information and statistics'},
+        {'name': 'games', 'description': 'Game schedules, scores, and live updates'},
+        {'name': 'players', 'description': 'Player profiles and statistics'},
+        {'name': 'scores', 'description': 'Period-by-period scoring information'},
+    ],
 }
 
 # Celery Configuration

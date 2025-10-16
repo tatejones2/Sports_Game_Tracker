@@ -1,0 +1,1528 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Sports Game Tracker API",
+    "version": "1.0.0",
+    "description": "Professional sports data aggregation platform with live scores for NFL, NBA, MLB, NHL, and NCAA sports. Provides real-time game data, scores, team information, and player statistics.",
+    "contact": {
+      "name": "Sports Game Tracker API Support",
+      "email": "support@sportsgametracker.com"
+    },
+    "license": {
+      "name": "MIT License"
+    }
+  },
+  "paths": {
+    "/api/games/": {
+      "get": {
+        "operationId": "games_list",
+        "description": "Retrieve a list of games with filtering by status, teams, and date. Includes live scores and period-by-period scoring.",
+        "summary": "List all games",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "away_team",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by away team ID"
+          },
+          {
+            "in": "query",
+            "name": "game_date",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter by game date (YYYY-MM-DD)",
+            "examples": {
+              "Today": {
+                "value": "2025-10-16"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "home_team",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by home team ID"
+          },
+          {
+            "in": "query",
+            "name": "home_team__league",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ordering",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order by: game_date, scheduled_time, created_at",
+            "examples": {
+              "LatestFirst": {
+                "value": "-game_date",
+                "summary": "Latest first"
+              }
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by team name"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cancelled",
+                "final",
+                "in_progress",
+                "live",
+                "postponed",
+                "scheduled"
+              ]
+            },
+            "description": "Filter by game status",
+            "examples": {
+              "LiveGames": {
+                "value": "live",
+                "summary": "Live games"
+              }
+            }
+          }
+        ],
+        "tags": [
+          "games"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedGameListList"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/games/{id}/": {
+      "get": {
+        "operationId": "games_retrieve",
+        "description": "Retrieve detailed information about a specific game including scores and teams.",
+        "summary": "Get game details",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this Game.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "games"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Game"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/games/live/": {
+      "get": {
+        "operationId": "games_live_list",
+        "description": "Retrieve all games currently in progress across all leagues.",
+        "summary": "Get live games",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "away_team",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "game_date",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "home_team",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "home_team__league",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "ordering",
+            "required": false,
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "A search term.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cancelled",
+                "final",
+                "in_progress",
+                "live",
+                "postponed",
+                "scheduled"
+              ]
+            },
+            "description": "* `scheduled` - Scheduled\n* `live` - Live\n* `in_progress` - In Progress\n* `final` - Final\n* `postponed` - Postponed\n* `cancelled` - Cancelled"
+          }
+        ],
+        "tags": [
+          "games"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedGameListList"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/games/today/": {
+      "get": {
+        "operationId": "games_today_list",
+        "description": "Retrieve all games scheduled for today regardless of status.",
+        "summary": "Get today's games",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "away_team",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "game_date",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "home_team",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "home_team__league",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "ordering",
+            "required": false,
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "A search term.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cancelled",
+                "final",
+                "in_progress",
+                "live",
+                "postponed",
+                "scheduled"
+              ]
+            },
+            "description": "* `scheduled` - Scheduled\n* `live` - Live\n* `in_progress` - In Progress\n* `final` - Final\n* `postponed` - Postponed\n* `cancelled` - Cancelled"
+          }
+        ],
+        "tags": [
+          "games"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedGameListList"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/leagues/": {
+      "get": {
+        "operationId": "leagues_list",
+        "description": "Retrieve a list of all sports leagues including NFL, NBA, MLB, NHL, and NCAA.",
+        "summary": "List all leagues",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ordering",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field (prefix with - for descending)",
+            "examples": {
+              "OrderByName": {
+                "value": "name",
+                "summary": "Order by name"
+              },
+              "OrderByAbbreviation": {
+                "value": "abbreviation",
+                "summary": "Order by abbreviation"
+              }
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by league name, abbreviation, or sport type",
+            "examples": {
+              "SearchByName": {
+                "value": "National",
+                "summary": "Search by name"
+              },
+              "SearchByAbbreviation": {
+                "value": "NFL",
+                "summary": "Search by abbreviation"
+              }
+            }
+          }
+        ],
+        "tags": [
+          "leagues"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedLeagueList"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/leagues/{id}/": {
+      "get": {
+        "operationId": "leagues_retrieve",
+        "description": "Retrieve detailed information about a specific league by ID.",
+        "summary": "Get league details",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this League.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "leagues"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/League"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/players/": {
+      "get": {
+        "operationId": "players_list",
+        "description": "Retrieve a list of players with filtering by team and position.",
+        "summary": "List all players",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ordering",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order by: first_name, last_name, jersey_number",
+            "examples": {
+              "OrderByLastName": {
+                "value": "last_name",
+                "summary": "Order by last name"
+              }
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "position",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by position (e.g., QB, RB, PG, C)",
+            "examples": {
+              "Quarterbacks": {
+                "value": "QB"
+              },
+              "PointGuards": {
+                "value": "PG",
+                "summary": "Point Guards"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by first name, last name, or position",
+            "examples": {
+              "SearchByLastName": {
+                "value": "Mahomes",
+                "summary": "Search by last name"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "team",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by team ID"
+          },
+          {
+            "in": "query",
+            "name": "team__league",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "tags": [
+          "players"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedPlayerList"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/players/{id}/": {
+      "get": {
+        "operationId": "players_retrieve",
+        "description": "Retrieve detailed information about a specific player.",
+        "summary": "Get player details",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this Player.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "players"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Player"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/scores/": {
+      "get": {
+        "operationId": "scores_list",
+        "description": "Retrieve period-by-period scoring data for games.",
+        "summary": "List all period scores",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "game",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by game ID"
+          },
+          {
+            "in": "query",
+            "name": "ordering",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order by: period, created_at"
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by period/quarter number",
+            "examples": {
+              "FirstQuarter": {
+                "value": 1,
+                "summary": "First quarter"
+              },
+              "FourthQuarter": {
+                "value": 4,
+                "summary": "Fourth quarter"
+              }
+            }
+          }
+        ],
+        "tags": [
+          "scores"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedScoreList"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/scores/{id}/": {
+      "get": {
+        "operationId": "scores_retrieve",
+        "description": "Retrieve detailed information about a specific period score.",
+        "summary": "Get score details",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this Score.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "scores"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Score"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/teams/": {
+      "get": {
+        "operationId": "teams_list",
+        "description": "Retrieve a list of teams with optional filtering by league. Returns lightweight team data with nested league information.",
+        "summary": "List all teams",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "league",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter teams by league ID",
+            "examples": {
+              "NFLTeams": {
+                "value": 1,
+                "summary": "NFL teams"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "league__abbreviation",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ordering",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order by: name, wins, losses, created_at",
+            "examples": {
+              "OrderByWins": {
+                "value": "-wins",
+                "summary": "Order by wins"
+              }
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by team name, city, or abbreviation",
+            "examples": {
+              "SearchByCity": {
+                "value": "Kansas City",
+                "summary": "Search by city"
+              }
+            }
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedTeamListList"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/teams/{id}/": {
+      "get": {
+        "operationId": "teams_retrieve",
+        "description": "Retrieve detailed information about a specific team including win/loss record.",
+        "summary": "Get team details",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "A unique integer value identifying this Team.",
+            "required": true
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "basicAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Game": {
+        "type": "object",
+        "description": "Serializer for Game model with nested teams and scores.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "home_team": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamList"
+              }
+            ],
+            "readOnly": true
+          },
+          "away_team": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamList"
+              }
+            ],
+            "readOnly": true
+          },
+          "game_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scheduled_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Scheduled start time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusEnum"
+          },
+          "period": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64",
+            "nullable": true,
+            "description": "Current period/quarter"
+          },
+          "time_remaining": {
+            "type": "string",
+            "description": "Time remaining in period",
+            "maxLength": 20
+          },
+          "home_score": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64"
+          },
+          "away_score": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64"
+          },
+          "scores": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Score"
+            },
+            "readOnly": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "away_team",
+          "created_at",
+          "game_date",
+          "home_team",
+          "id",
+          "scores",
+          "updated_at"
+        ]
+      },
+      "GameList": {
+        "type": "object",
+        "description": "Lightweight serializer for Game in list views.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "home_team_name": {
+            "type": "string",
+            "readOnly": true
+          },
+          "away_team_name": {
+            "type": "string",
+            "readOnly": true
+          },
+          "home_team_abbreviation": {
+            "type": "string",
+            "readOnly": true
+          },
+          "away_team_abbreviation": {
+            "type": "string",
+            "readOnly": true
+          },
+          "game_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scheduled_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Scheduled start time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusEnum"
+          },
+          "period": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64",
+            "nullable": true,
+            "description": "Current period/quarter"
+          },
+          "time_remaining": {
+            "type": "string",
+            "description": "Time remaining in period",
+            "maxLength": 20
+          },
+          "home_score": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64"
+          },
+          "away_score": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64"
+          }
+        },
+        "required": [
+          "away_team_abbreviation",
+          "away_team_name",
+          "game_date",
+          "home_team_abbreviation",
+          "home_team_name",
+          "id"
+        ]
+      },
+      "League": {
+        "type": "object",
+        "description": "Serializer for League model.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "abbreviation": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "sport_type": {
+            "$ref": "#/components/schemas/SportTypeEnum"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "abbreviation",
+          "created_at",
+          "id",
+          "name",
+          "sport_type",
+          "updated_at"
+        ]
+      },
+      "PaginatedGameListList": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "example": 123
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=4"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=2"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameList"
+            }
+          }
+        }
+      },
+      "PaginatedLeagueList": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "example": 123
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=4"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=2"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/League"
+            }
+          }
+        }
+      },
+      "PaginatedPlayerList": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "example": 123
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=4"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=2"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Player"
+            }
+          }
+        }
+      },
+      "PaginatedScoreList": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "example": 123
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=4"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=2"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Score"
+            }
+          }
+        }
+      },
+      "PaginatedTeamListList": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "example": 123
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=4"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "example": "http://api.example.org/accounts/?page=2"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamList"
+            }
+          }
+        }
+      },
+      "Player": {
+        "type": "object",
+        "description": "Serializer for Player model with nested team.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "team": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamList"
+              }
+            ],
+            "readOnly": true
+          },
+          "first_name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "last_name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "full_name": {
+            "type": "string",
+            "readOnly": true
+          },
+          "position": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "jersey_number": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "created_at",
+          "first_name",
+          "full_name",
+          "id",
+          "last_name",
+          "position",
+          "team",
+          "updated_at"
+        ]
+      },
+      "Score": {
+        "type": "object",
+        "description": "Serializer for Score model.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "game": {
+            "type": "integer"
+          },
+          "period": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64"
+          },
+          "home_score": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64"
+          },
+          "away_score": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "created_at",
+          "game",
+          "id",
+          "period"
+        ]
+      },
+      "SportTypeEnum": {
+        "enum": [
+          "NFL",
+          "NBA",
+          "MLB",
+          "NHL",
+          "NCAAF",
+          "NCAAB"
+        ],
+        "type": "string",
+        "description": "* `NFL` - National Football League\n* `NBA` - National Basketball Association\n* `MLB` - Major League Baseball\n* `NHL` - National Hockey League\n* `NCAAF` - NCAA Football\n* `NCAAB` - NCAA Basketball"
+      },
+      "StatusEnum": {
+        "enum": [
+          "scheduled",
+          "live",
+          "in_progress",
+          "final",
+          "postponed",
+          "cancelled"
+        ],
+        "type": "string",
+        "description": "* `scheduled` - Scheduled\n* `live` - Live\n* `in_progress` - In Progress\n* `final` - Final\n* `postponed` - Postponed\n* `cancelled` - Cancelled"
+      },
+      "Team": {
+        "type": "object",
+        "description": "Serializer for Team model with nested league.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "league": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/League"
+              }
+            ],
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "abbreviation": {
+            "type": "string",
+            "maxLength": 5
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "logo_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "maxLength": 200
+          },
+          "external_id": {
+            "type": "string",
+            "description": "External API ID for this team",
+            "maxLength": 50
+          },
+          "wins": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64"
+          },
+          "losses": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "abbreviation",
+          "created_at",
+          "id",
+          "league",
+          "name",
+          "updated_at"
+        ]
+      },
+      "TeamList": {
+        "type": "object",
+        "description": "Lightweight serializer for Team in list views.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "abbreviation": {
+            "type": "string",
+            "maxLength": 5
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "logo_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "maxLength": 200
+          },
+          "league_abbreviation": {
+            "type": "string",
+            "readOnly": true
+          },
+          "wins": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64"
+          },
+          "losses": {
+            "type": "integer",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "format": "int64"
+          }
+        },
+        "required": [
+          "abbreviation",
+          "id",
+          "league_abbreviation",
+          "name"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "leagues",
+      "description": "Operations for sports leagues (NFL, NBA, MLB, etc.)"
+    },
+    {
+      "name": "teams",
+      "description": "Team information and statistics"
+    },
+    {
+      "name": "games",
+      "description": "Game schedules, scores, and live updates"
+    },
+    {
+      "name": "players",
+      "description": "Player profiles and statistics"
+    },
+    {
+      "name": "scores",
+      "description": "Period-by-period scoring information"
+    }
+  ]
+}
