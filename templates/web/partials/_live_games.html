@@ -33,6 +33,43 @@
             </div>
         </div>
         
+        <!-- Situation Info (for MLB games) -->
+        {% if game.situation and game.league.abbreviation == 'MLB' %}
+        <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="text-xs text-gray-700 space-y-1.5">
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold text-blue-900">{{ game.situation.pitcher.name }}</span>
+                    <span class="font-mono bg-white px-2 py-1 rounded text-blue-900 font-semibold">
+                        {{ game.situation.balls }}-{{ game.situation.strikes }}, {{ game.situation.outs }} out{% if game.situation.outs != 1 %}s{% endif %}
+                    </span>
+                </div>
+                <div class="text-gray-600">
+                    <i class="fas fa-baseball-ball mr-1"></i>
+                    {{ game.situation.batter.name }} batting
+                </div>
+                {% if game.situation.on_base.first or game.situation.on_base.second or game.situation.on_base.third %}
+                <div class="flex items-center justify-between pt-1.5 border-t border-blue-200">
+                    <span class="text-gray-600">Runners on base:</span>
+                    <div class="flex items-center space-x-1.5">
+                        <div class="text-center">
+                            <div class="w-5 h-5 {% if game.situation.on_base.first %}bg-green-500{% else %}bg-gray-300{% endif %} rounded transform rotate-45"></div>
+                            <span class="text-[10px] text-gray-500">1st</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-5 h-5 {% if game.situation.on_base.second %}bg-green-500{% else %}bg-gray-300{% endif %} rounded transform rotate-45"></div>
+                            <span class="text-[10px] text-gray-500">2nd</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-5 h-5 {% if game.situation.on_base.third %}bg-green-500{% else %}bg-gray-300{% endif %} rounded transform rotate-45"></div>
+                            <span class="text-[10px] text-gray-500">3rd</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
         <!-- Actions -->
         <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
             <span class="text-sm text-gray-500">

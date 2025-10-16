@@ -116,6 +116,14 @@ class Game(models.Model):
     away_score = models.IntegerField(default=0)
     period = models.IntegerField(null=True, blank=True, help_text="Current period/quarter")
     time_remaining = models.CharField(max_length=20, blank=True, default='', help_text="Time remaining in period")
+    
+    # Game situation details (for live games)
+    situation = models.JSONField(
+        null=True, 
+        blank=True, 
+        help_text="Live game situation (balls, strikes, outs, pitcher, batter, bases, etc.)"
+    )
+    
     external_id = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -184,6 +184,29 @@ class ESPNClient:
         }
         status = status_map.get(status_type, 'scheduled')
         
+        # Extract situation data (if available)
+        situation = None
+        if competition.get('situation'):
+            sit = competition['situation']
+            situation = {
+                'balls': sit.get('balls'),
+                'strikes': sit.get('strikes'),
+                'outs': sit.get('outs'),
+                'pitcher': {
+                    'name': sit.get('pitcher', {}).get('athlete', {}).get('shortName'),
+                    'summary': sit.get('pitcher', {}).get('summary')
+                } if sit.get('pitcher') else None,
+                'batter': {
+                    'name': sit.get('batter', {}).get('athlete', {}).get('shortName'),
+                    'summary': sit.get('batter', {}).get('summary')
+                } if sit.get('batter') else None,
+                'on_base': {
+                    'first': sit.get('onFirst', False),
+                    'second': sit.get('onSecond', False),
+                    'third': sit.get('onThird', False)
+                }
+            }
+        
         return {
             'id': event.get('id'),
             'home_team': {
@@ -203,7 +226,8 @@ class ESPNClient:
             'status': status,
             'scheduled_time': competition.get('date'),
             'period': status_data.get('period'),
-            'clock': status_data.get('displayClock', '')
+            'clock': status_data.get('displayClock', ''),
+            'situation': situation
         }
 
     def get_scoreboard(
