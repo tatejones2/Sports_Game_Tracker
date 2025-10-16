@@ -151,37 +151,98 @@ class ESPNClient:
         except ValueError as e:
             raise ESPNAPIError(f"Invalid JSON response: {e}") from e
 
+    def _parse_scoreboard_event(self, event: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Parse a single ESPN event into our standard format.
+        
+        Args:
+            event: Raw event data from ESPN API
+            
+        Returns:
+            Parsed game data
+        """
+        # Get the competition (usually first one)
+        competition = event.get('competitions', [{}])[0]
+        competitors = competition.get('competitors', [])
+        
+        # Find home and away teams
+        home_competitor = next((c for c in competitors if c.get('homeAway') == 'home'), {})
+        away_competitor = next((c for c in competitors if c.get('homeAway') == 'away'), {})
+        
+        # Get status
+        status_data = competition.get('status', {})
+        status_type = status_data.get('type', {}).get('name', 'scheduled')
+        
+        # Map ESPN status to our status
+        status_map = {
+            'STATUS_SCHEDULED': 'scheduled',
+            'STATUS_IN_PROGRESS': 'in_progress',
+            'STATUS_FINAL': 'final',
+            'STATUS_POSTPONED': 'postponed',
+            'STATUS_CANCELED': 'cancelled',
+            'STATUS_SUSPENDED': 'suspended'
+        }
+        status = status_map.get(status_type, 'scheduled')
+        
+        return {
+            'id': event.get('id'),
+            'home_team': {
+                'id': home_competitor.get('id'),
+                'abbreviation': home_competitor.get('team', {}).get('abbreviation'),
+                'name': home_competitor.get('team', {}).get('displayName'),
+                'logo': home_competitor.get('team', {}).get('logo')
+            },
+            'away_team': {
+                'id': away_competitor.get('id'),
+                'abbreviation': away_competitor.get('team', {}).get('abbreviation'),
+                'name': away_competitor.get('team', {}).get('displayName'),
+                'logo': away_competitor.get('team', {}).get('logo')
+            },
+            'home_score': int(home_competitor.get('score', 0)),
+            'away_score': int(away_competitor.get('score', 0)),
+            'status': status,
+            'scheduled_time': competition.get('date'),
+            'period': status_data.get('period'),
+            'clock': status_data.get('displayClock', '')
+        }
+
     def get_scoreboard(
         self,
         league: str,
         date: Optional[str] = None,
         limit: int = 100
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         """
         Get scoreboard data for a league.
 
         Args:
-            league: League abbreviation (e.g., 'NFL', 'NBA')
+            league: League abbreviation (e.g., 'NFL', 'NBA' or 'nfl', 'nba')
             date: Date in YYYYMMDD format (None = today)
             limit: Maximum number of results
 
         Returns:
-            Scoreboard data with events and scores
+            List of parsed game data
 
         Raises:
             ESPNAPIError: If request fails or league is invalid
         """
-        if league not in self.SPORT_MAPPINGS:
+        # Normalize league to uppercase for mapping lookup
+        league_upper = league.upper()
+        if league_upper not in self.SPORT_MAPPINGS:
             raise ESPNAPIError(f"Unsupported league: {league}")
         
-        mapping = self.SPORT_MAPPINGS[league]
+        mapping = self.SPORT_MAPPINGS[league_upper]
         endpoint = f"{mapping['sport']}/{mapping['league']}/scoreboard"
         
         params = {'limit': limit}
         if date:
             params['dates'] = date
         
-        return self._make_request(endpoint, **params)
+        response = self._make_request(endpoint, **params)
+        
+        # Parse events into our standard format
+        events = response.get('events', [])
+        return [self._parse_scoreboard_event(event) for event in events]
 
     def get_teams(self, league: str, limit: int = 100) -> Dict[str, Any]:
         """
