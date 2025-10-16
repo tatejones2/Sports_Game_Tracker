@@ -146,14 +146,15 @@
                         {% if game.league.abbreviation == 'MLB' %}
                         <div class="mt-3 pt-3 border-t border-gray-200">
                             <div class="text-xs text-gray-600 space-y-1">
+                                {% if game.situation.pitcher and game.situation.batter %}
                                 <div class="flex justify-between items-center">
-                                    <span class="font-medium">{{ game.situation.pitcher.name }} pitching</span>
+                                    <span class="font-medium">{{ game.situation.pitcher.name }} P: {{ game.situation.pitcher.summary }}</span>
                                     <span class="font-mono bg-gray-100 px-2 py-0.5 rounded">
                                         {{ game.situation.balls }}-{{ game.situation.strikes }}, {{ game.situation.outs }} out{% if game.situation.outs != 1 %}s{% endif %}
                                     </span>
                                 </div>
                                 <div class="text-gray-500">
-                                    {{ game.situation.batter.name }} at bat
+                                    {{ game.situation.batter.name }}: {{ game.situation.batter.summary }}
                                 </div>
                                 {% if game.situation.on_base.first or game.situation.on_base.second or game.situation.on_base.third %}
                                 <div class="flex items-center justify-end space-x-1 mt-1">
@@ -161,6 +162,11 @@
                                     <span class="w-4 h-4 {% if game.situation.on_base.first %}bg-green-500{% else %}bg-gray-200{% endif %} rounded-sm"></span>
                                     <span class="w-4 h-4 {% if game.situation.on_base.second %}bg-green-500{% else %}bg-gray-200{% endif %} rounded-sm"></span>
                                     <span class="w-4 h-4 {% if game.situation.on_base.third %}bg-green-500{% else %}bg-gray-200{% endif %} rounded-sm"></span>
+                                </div>
+                                {% endif %}
+                                {% else %}
+                                <div class="text-center text-gray-500 italic py-1">
+                                    Between innings
                                 </div>
                                 {% endif %}
                             </div>

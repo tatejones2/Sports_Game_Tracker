@@ -37,15 +37,16 @@
         {% if game.situation and game.league.abbreviation == 'MLB' %}
         <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div class="text-xs text-gray-700 space-y-1.5">
+                {% if game.situation.pitcher and game.situation.batter %}
                 <div class="flex justify-between items-center">
-                    <span class="font-semibold text-blue-900">{{ game.situation.pitcher.name }}</span>
+                    <span class="font-semibold text-blue-900">{{ game.situation.pitcher.name }} P: {{ game.situation.pitcher.summary }}</span>
                     <span class="font-mono bg-white px-2 py-1 rounded text-blue-900 font-semibold">
                         {{ game.situation.balls }}-{{ game.situation.strikes }}, {{ game.situation.outs }} out{% if game.situation.outs != 1 %}s{% endif %}
                     </span>
                 </div>
                 <div class="text-gray-600">
                     <i class="fas fa-baseball-ball mr-1"></i>
-                    {{ game.situation.batter.name }} batting
+                    {{ game.situation.batter.name }}: {{ game.situation.batter.summary }}
                 </div>
                 {% if game.situation.on_base.first or game.situation.on_base.second or game.situation.on_base.third %}
                 <div class="flex items-center justify-between pt-1.5 border-t border-blue-200">
@@ -64,6 +65,12 @@
                             <span class="text-[10px] text-gray-500">3rd</span>
                         </div>
                     </div>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="text-center text-gray-600 italic py-1">
+                    <i class="fas fa-pause-circle mr-1"></i>
+                    Between innings
                 </div>
                 {% endif %}
             </div>
