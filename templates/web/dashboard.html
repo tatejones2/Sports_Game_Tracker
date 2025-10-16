@@ -157,11 +157,18 @@
                                     {{ game.situation.batter.name }}: {{ game.situation.batter.summary }}
                                 </div>
                                 {% if game.situation.on_base.first or game.situation.on_base.second or game.situation.on_base.third %}
-                                <div class="flex items-center justify-end space-x-1 mt-1">
-                                    <span class="text-gray-500 mr-1">Runners:</span>
-                                    <span class="w-4 h-4 {% if game.situation.on_base.first %}bg-green-500{% else %}bg-gray-200{% endif %} rounded-sm"></span>
-                                    <span class="w-4 h-4 {% if game.situation.on_base.second %}bg-green-500{% else %}bg-gray-200{% endif %} rounded-sm"></span>
-                                    <span class="w-4 h-4 {% if game.situation.on_base.third %}bg-green-500{% else %}bg-gray-200{% endif %} rounded-sm"></span>
+                                <div class="flex items-center justify-end mt-2">
+                                    <span class="text-gray-500 mr-2 text-[10px]">Runners:</span>
+                                    <div class="relative w-12 h-12">
+                                        <!-- Second Base (Top) -->
+                                        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 {% if game.situation.on_base.second %}bg-green-500{% else %}bg-gray-300{% endif %} transform rotate-45"></div>
+                                        <!-- Third Base (Left) -->
+                                        <div class="absolute top-1/2 left-0 -translate-y-1/2 w-3 h-3 {% if game.situation.on_base.third %}bg-green-500{% else %}bg-gray-300{% endif %} transform rotate-45"></div>
+                                        <!-- First Base (Right) -->
+                                        <div class="absolute top-1/2 right-0 -translate-y-1/2 w-3 h-3 {% if game.situation.on_base.first %}bg-green-500{% else %}bg-gray-300{% endif %} transform rotate-45"></div>
+                                        <!-- Home Plate (Bottom) -->
+                                        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-400"></div>
+                                    </div>
                                 </div>
                                 {% endif %}
                                 {% else %}

@@ -49,21 +49,18 @@
                     {{ game.situation.batter.name }}: {{ game.situation.batter.summary }}
                 </div>
                 {% if game.situation.on_base.first or game.situation.on_base.second or game.situation.on_base.third %}
-                <div class="flex items-center justify-between pt-1.5 border-t border-blue-200">
-                    <span class="text-gray-600">Runners on base:</span>
-                    <div class="flex items-center space-x-1.5">
-                        <div class="text-center">
-                            <div class="w-5 h-5 {% if game.situation.on_base.first %}bg-green-500{% else %}bg-gray-300{% endif %} rounded transform rotate-45"></div>
-                            <span class="text-[10px] text-gray-500">1st</span>
-                        </div>
-                        <div class="text-center">
-                            <div class="w-5 h-5 {% if game.situation.on_base.second %}bg-green-500{% else %}bg-gray-300{% endif %} rounded transform rotate-45"></div>
-                            <span class="text-[10px] text-gray-500">2nd</span>
-                        </div>
-                        <div class="text-center">
-                            <div class="w-5 h-5 {% if game.situation.on_base.third %}bg-green-500{% else %}bg-gray-300{% endif %} rounded transform rotate-45"></div>
-                            <span class="text-[10px] text-gray-500">3rd</span>
-                        </div>
+                <div class="flex items-center justify-center pt-2 border-t border-blue-200">
+                    <div class="relative w-16 h-16">
+                        <!-- Second Base (Top) -->
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 {% if game.situation.on_base.second %}bg-green-500{% else %}bg-gray-300{% endif %} transform rotate-45 shadow-sm"></div>
+                        <!-- Third Base (Left) -->
+                        <div class="absolute top-1/2 left-0 -translate-y-1/2 w-4 h-4 {% if game.situation.on_base.third %}bg-green-500{% else %}bg-gray-300{% endif %} transform rotate-45 shadow-sm"></div>
+                        <!-- First Base (Right) -->
+                        <div class="absolute top-1/2 right-0 -translate-y-1/2 w-4 h-4 {% if game.situation.on_base.first %}bg-green-500{% else %}bg-gray-300{% endif %} transform rotate-45 shadow-sm"></div>
+                        <!-- Home Plate (Bottom) -->
+                        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-400 shadow-sm"></div>
+                        <!-- Base path lines -->
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 border border-gray-300 transform rotate-45"></div>
                     </div>
                 </div>
                 {% endif %}
