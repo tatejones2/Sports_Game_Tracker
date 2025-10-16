@@ -28,12 +28,12 @@ class Command(BaseCommand):
         nfl = League.objects.create(
             name="National Football League",
             abbreviation="NFL",
-            sport_type="football",
+            sport_type="NFL",
         )
         nba = League.objects.create(
             name="National Basketball Association",
             abbreviation="NBA",
-            sport_type="basketball",
+            sport_type="NBA",
         )
         self.stdout.write(self.style.SUCCESS(f'Created leagues: {nfl}, {nba}'))
 
