@@ -124,6 +124,13 @@ class Game(models.Model):
         help_text="Live game situation (balls, strikes, outs, pitcher, batter, bases, etc.)"
     )
     
+    # Box score data (inning-by-inning scores, hits, errors)
+    box_score = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Inning-by-inning line scores and game statistics"
+    )
+    
     external_id = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

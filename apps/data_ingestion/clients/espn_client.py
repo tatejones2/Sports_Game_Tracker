@@ -207,6 +207,26 @@ class ESPNClient:
                 }
             }
         
+        # Extract linescores (inning-by-inning scores)
+        home_linescores = [ls.get('displayValue', '-') for ls in home_competitor.get('linescores', [])]
+        away_linescores = [ls.get('displayValue', '-') for ls in away_competitor.get('linescores', [])]
+        
+        # Extract statistics (hits, errors)
+        def get_stat(competitor, stat_name):
+            for stat in competitor.get('statistics', []):
+                if stat.get('name') == stat_name:
+                    return stat.get('displayValue', '0')
+            return '0'
+        
+        home_stats = {
+            'hits': get_stat(home_competitor, 'hits'),
+            'errors': get_stat(home_competitor, 'errors')
+        }
+        away_stats = {
+            'hits': get_stat(away_competitor, 'hits'),
+            'errors': get_stat(away_competitor, 'errors')
+        }
+        
         return {
             'id': event.get('id'),
             'home_team': {
@@ -227,7 +247,13 @@ class ESPNClient:
             'scheduled_time': competition.get('date'),
             'period': status_data.get('period'),
             'clock': status_data.get('displayClock', ''),
-            'situation': situation
+            'situation': situation,
+            'box_score': {
+                'home_linescores': home_linescores,
+                'away_linescores': away_linescores,
+                'home_stats': home_stats,
+                'away_stats': away_stats
+            }
         }
 
     def get_scoreboard(

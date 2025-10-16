@@ -141,6 +141,50 @@
                         </div>
                     </div>
                     
+                    <!-- Box Score (for MLB games with box score data) -->
+                    {% if game.league.abbreviation == 'MLB' and game.box_score %}
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <div class="text-[10px] font-mono text-gray-700">
+                                <div class="grid grid-cols-13 gap-0.5 text-center">
+                                    <!-- Header -->
+                                    <div class="col-span-1"></div>
+                                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div>
+                                    <div class="font-bold">R</div><div class="font-bold">H</div><div class="font-bold">E</div>
+                                    
+                                    <!-- Away Team -->
+                                    <div class="col-span-1 text-left font-semibold">{{ game.away_team.abbreviation }}</div>
+                                    {% if game.box_score.away_linescores.0 %}<div>{{ game.box_score.away_linescores.0 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.away_linescores.1 %}<div>{{ game.box_score.away_linescores.1 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.away_linescores.2 %}<div>{{ game.box_score.away_linescores.2 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.away_linescores.3 %}<div>{{ game.box_score.away_linescores.3 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.away_linescores.4 %}<div>{{ game.box_score.away_linescores.4 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.away_linescores.5 %}<div>{{ game.box_score.away_linescores.5 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.away_linescores.6 %}<div>{{ game.box_score.away_linescores.6 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.away_linescores.7 %}<div>{{ game.box_score.away_linescores.7 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.away_linescores.8 %}<div>{{ game.box_score.away_linescores.8 }}</div>{% else %}<div>-</div>{% endif %}
+                                    <div class="font-bold">{{ game.away_score }}</div>
+                                    <div>{{ game.box_score.away_stats.hits }}</div>
+                                    <div>{{ game.box_score.away_stats.errors }}</div>
+                                    
+                                    <!-- Home Team -->
+                                    <div class="col-span-1 text-left font-semibold">{{ game.home_team.abbreviation }}</div>
+                                    {% if game.box_score.home_linescores.0 %}<div>{{ game.box_score.home_linescores.0 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.home_linescores.1 %}<div>{{ game.box_score.home_linescores.1 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.home_linescores.2 %}<div>{{ game.box_score.home_linescores.2 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.home_linescores.3 %}<div>{{ game.box_score.home_linescores.3 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.home_linescores.4 %}<div>{{ game.box_score.home_linescores.4 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.home_linescores.5 %}<div>{{ game.box_score.home_linescores.5 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.home_linescores.6 %}<div>{{ game.box_score.home_linescores.6 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.home_linescores.7 %}<div>{{ game.box_score.home_linescores.7 }}</div>{% else %}<div>-</div>{% endif %}
+                                    {% if game.box_score.home_linescores.8 %}<div>{{ game.box_score.home_linescores.8 }}</div>{% else %}<div>-</div>{% endif %}
+                                    <div class="font-bold">{{ game.home_score }}</div>
+                                    <div>{{ game.box_score.home_stats.hits }}</div>
+                                    <div>{{ game.box_score.home_stats.errors }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
                     <!-- Situation Info (for live games with situation data) -->
                     {% if game.status == 'in_progress' and game.situation %}
                         {% if game.league.abbreviation == 'MLB' %}

@@ -195,6 +195,7 @@ class SyncService:
                         "period": game_data.get("period"),
                         "time_remaining": game_data.get("clock", ""),
                         "situation": game_data.get("situation"),
+                        "box_score": game_data.get("box_score"),
                     },
                 )
 
