@@ -83,6 +83,7 @@ class Game(models.Model):
     
     STATUS_CHOICES = [
         ('scheduled', 'Scheduled'),
+        ('live', 'Live'),  # Added for ESPN API compatibility
         ('in_progress', 'In Progress'),
         ('final', 'Final'),
         ('postponed', 'Postponed'),
