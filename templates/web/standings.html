@@ -15,18 +15,16 @@
     
     <!-- League Tabs -->
     <div class="bg-white rounded-lg shadow">
-        <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
-                {% for league in leagues %}
-                <a href="?league={{ league.id }}"
-                   class="{% if selected_league.id == league.id %}border-indigo-500 text-indigo-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-                    {{ league.name }}
-                </a>
-                {% endfor %}
-            </nav>
-        </div>
-        
-        <!-- Standings Table -->
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8" aria-label="Leagues">
+                    {% for league in leagues %}
+                    <a href="?league={{ league.id }}" 
+                       class="{% if league == selected_league %}border-indigo-500 text-indigo-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    {{ league.abbreviation }}
+                    </a>
+                    {% endfor %}
+                </nav>
+            </div>        <!-- Standings Table -->
         <div class="p-6">
             {% if teams %}
             <div class="overflow-x-auto">
