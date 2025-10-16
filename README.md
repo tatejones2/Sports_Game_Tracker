@@ -164,22 +164,27 @@ docker-compose up -d
 python manage.py migrate
 ```
 
-6. **Create superuser**
+6. **Fetch real ESPN data** (NEW - replaces mock data)
+```bash
+python manage.py sync_games
+```
+
+7. **Create superuser**
 ```bash
 python manage.py createsuperuser
 ```
 
-7. **Start development server**
+8. **Start development server**
 ```bash
 python manage.py runserver
 ```
 
-8. **Start Celery worker** (in a new terminal)
+9. **Start Celery worker** (in a new terminal)
 ```bash
 celery -A config worker -l info
 ```
 
-9. **Start Celery beat** (in another terminal)
+10. **Start Celery beat** (in another terminal)
 ```bash
 celery -A config beat -l info
 ```
