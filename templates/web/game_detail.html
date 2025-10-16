@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ game.away_team.abbreviation }} @ {{ game.home_team.abbreviation }} - Sports Game Tracker{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Game Header -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <!-- League and Status Bar -->
+        <div class="bg-gray-50 px-6 py-3 flex justify-between items-center border-b border-gray-200">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                {{ game.league.name }}
+            </span>
+            {% if game.status == 'live' %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 animate-pulse">
+                <i class="fas fa-circle mr-2"></i>
+                LIVE
+            </span>
+            {% elif game.status == 'final' %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-600 text-white">
+                FINAL
+            </span>
+            {% else %}
+            <span class="text-sm font-medium text-gray-600">
+                {{ game.scheduled_time|date:"F j, Y - g:i A" }}
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- Teams and Score -->
+        <div class="p-8">
+            <!-- Away Team -->
+            <div class="flex items-center justify-between mb-6 pb-6 border-b border-gray-200">
+                <div class="flex items-center space-x-6">
+                    <div class="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-2xl font-bold text-gray-600">
+                        {{ game.away_team.abbreviation }}
+                    </div>
+                    <div>
+                        <a href="{% url 'web:team_detail' game.away_team.id %}" class="text-2xl font-bold text-gray-900 hover:text-indigo-600">
+                            {{ game.away_team.name }}
+                        </a>
+                        <p class="text-gray-500">{{ game.away_team.city }}</p>
+                        <p class="text-sm text-gray-400 mt-1">{{ game.away_team.wins }}-{{ game.away_team.losses }}-{{ game.away_team.ties }}</p>
+                    </div>
+                </div>
+                <div class="text-5xl font-bold text-gray-900">
+                    {{ game.away_score }}
+                </div>
+            </div>
+
+            <!-- Home Team -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <div class="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-2xl font-bold text-gray-600">
+                        {{ game.home_team.abbreviation }}
+                    </div>
+                    <div>
+                        <a href="{% url 'web:team_detail' game.home_team.id %}" class="text-2xl font-bold text-gray-900 hover:text-indigo-600">
+                            {{ game.home_team.name }}
+                        </a>
+                        <p class="text-gray-500">{{ game.home_team.city }}</p>
+                        <p class="text-sm text-gray-400 mt-1">{{ game.home_team.wins }}-{{ game.home_team.losses }}-{{ game.home_team.ties }}</p>
+                    </div>
+                </div>
+                <div class="text-5xl font-bold text-gray-900">
+                    {{ game.home_score }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Period-by-Period Scores -->
+    {% if periods %}
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-chart-line text-blue-400 mr-3"></i>
+                Period-by-Period Breakdown
+            </h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Team
+                        </th>
+                        {% for period in periods %}
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {% if game.league.abbreviation == 'NBA' or game.league.abbreviation == 'WNBA' %}
+                                Q{{ period.period }}
+                            {% elif game.league.abbreviation == 'NFL' %}
+                                Q{{ period.period }}
+                            {% elif game.league.abbreviation == 'NHL' %}
+                                P{{ period.period }}
+                            {% else %}
+                                {{ period.period }}
+                            {% endif %}
+                        </th>
+                        {% endfor %}
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-100">
+                            Total
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <!-- Away Team Row -->
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="text-sm font-medium text-gray-900">{{ game.away_team.name }}</div>
+                            </div>
+                        </td>
+                        {% for period in periods %}
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900 font-medium">
+                            {{ period.away_score }}
+                        </td>
+                        {% endfor %}
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-lg font-bold text-gray-900 bg-gray-50">
+                            {{ game.away_score }}
+                        </td>
+                    </tr>
+                    <!-- Home Team Row -->
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="text-sm font-medium text-gray-900">{{ game.home_team.name }}</div>
+                            </div>
+                        </td>
+                        {% for period in periods %}
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900 font-medium">
+                            {{ period.home_score }}
+                        </td>
+                        {% endfor %}
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-lg font-bold text-gray-900 bg-gray-50">
+                            {{ game.home_score }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Game Information -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Game Details -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-info-circle text-indigo-400 mr-2"></i>
+                Game Information
+            </h3>
+            <dl class="space-y-3">
+                <div class="flex justify-between">
+                    <dt class="text-sm font-medium text-gray-500">Date</dt>
+                    <dd class="text-sm text-gray-900">{{ game.game_date|date:"F j, Y" }}</dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-sm font-medium text-gray-500">Time</dt>
+                    <dd class="text-sm text-gray-900">{{ game.scheduled_time|date:"g:i A" }}</dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-sm font-medium text-gray-500">Status</dt>
+                    <dd class="text-sm text-gray-900 capitalize">{{ game.status }}</dd>
+                </div>
+                {% if game.period %}
+                <div class="flex justify-between">
+                    <dt class="text-sm font-medium text-gray-500">Current Period</dt>
+                    <dd class="text-sm text-gray-900">{{ game.period }}</dd>
+                </div>
+                {% endif %}
+                {% if game.time_remaining %}
+                <div class="flex justify-between">
+                    <dt class="text-sm font-medium text-gray-500">Time Remaining</dt>
+                    <dd class="text-sm text-gray-900">{{ game.time_remaining }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-link text-green-400 mr-2"></i>
+                Quick Links
+            </h3>
+            <div class="space-y-3">
+                <a href="{% url 'web:team_detail' game.away_team.id %}" class="block p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-900">{{ game.away_team.name }} Team Page</span>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </div>
+                </a>
+                <a href="{% url 'web:team_detail' game.home_team.id %}" class="block p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-900">{{ game.home_team.name }} Team Page</span>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </div>
+                </a>
+                <a href="{% url 'web:standings' %}?league={{ game.league.id }}" class="block p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-900">{{ game.league.name }} Standings</span>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </div>
+                </a>
+                <a href="{% url 'web:schedule' %}?date={{ game.game_date|date:'Y-m-d' }}" class="block p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-900">Full Schedule for {{ game.game_date|date:"M j" }}</span>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="flex justify-between">
+        <a href="{% url 'web:schedule' %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back to Schedule
+        </a>
+        <a href="{% url 'web:dashboard' %}" class="inline-flex items-center text-gray-600 hover:text-gray-800 font-medium">
+            <i class="fas fa-home mr-2"></i>
+            Dashboard
+        </a>
+    </div>
+</div>
+
+{% if game.status == 'live' %}
+{% block extra_js %}
+<script>
+    // Auto-refresh page every 30 seconds for live games
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+</script>
+{% endblock %}
+{% endif %}
+{% endblock %}

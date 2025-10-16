@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sports Game Tracker{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- HTMX for dynamic updates -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Alpine.js for interactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        /* Custom animations */
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Live indicator */
+        .live-indicator {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Score animation */
+        @keyframes score-update {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .score-updated {
+            animation: score-update 0.3s ease-in-out;
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <!-- Logo -->
+                    <a href="{% url 'web:dashboard' %}" class="flex items-center">
+                        <i class="fas fa-football text-indigo-600 text-2xl mr-3"></i>
+                        <span class="text-xl font-bold text-gray-900">Sports Game Tracker</span>
+                    </a>
+                    
+                    <!-- Main Navigation -->
+                    <div class="hidden md:ml-10 md:flex md:space-x-8">
+                        <a href="{% url 'web:dashboard' %}" 
+                           class="{% if request.resolver_match.url_name == 'dashboard' %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <i class="fas fa-home mr-2"></i>
+                            Dashboard
+                        </a>
+                        <a href="{% url 'web:live_games' %}" 
+                           class="{% if request.resolver_match.url_name == 'live_games' %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <i class="fas fa-circle text-red-500 mr-2 animate-pulse"></i>
+                            Live Games
+                        </a>
+                        <a href="{% url 'web:schedule' %}" 
+                           class="{% if request.resolver_match.url_name == 'schedule' %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <i class="fas fa-calendar mr-2"></i>
+                            Schedule
+                        </a>
+                        <a href="{% url 'web:standings' %}" 
+                           class="{% if request.resolver_match.url_name == 'standings' %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <i class="fas fa-trophy mr-2"></i>
+                            Standings
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Right side navigation -->
+                <div class="flex items-center">
+                    <a href="{% url 'schema' %}" 
+                       class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-code mr-2"></i>
+                        API
+                    </a>
+                    <a href="/admin/" 
+                       class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-cog mr-2"></i>
+                        Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div class="md:hidden" x-data="{ open: false }">
+            <button @click="open = !open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            
+            <div x-show="open" @click.away="open = false" x-cloak class="px-2 pt-2 pb-3 space-y-1">
+                <a href="{% url 'web:dashboard' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Dashboard</a>
+                <a href="{% url 'web:live_games' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Live Games</a>
+                <a href="{% url 'web:schedule' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Schedule</a>
+                <a href="{% url 'web:standings' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Standings</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex justify-between items-center">
+                <div class="text-gray-500 text-sm">
+                    © 2025 Sports Game Tracker. All rights reserved.
+                </div>
+                <div class="flex space-x-6">
+                    <a href="{% url 'swagger-ui' %}" class="text-gray-500 hover:text-gray-700 text-sm">
+                        <i class="fas fa-book mr-1"></i>
+                        API Docs
+                    </a>
+                    <a href="https://github.com/tatejones2/Sports_Game_Tracker" target="_blank" class="text-gray-500 hover:text-gray-700 text-sm">
+                        <i class="fab fa-github mr-1"></i>
+                        GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

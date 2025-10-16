@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ team.name }} - Sports Game Tracker{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Team Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-lg shadow-lg p-8 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-indigo-200 mb-2">{{ team.league.name }}</p>
+                <h1 class="text-4xl font-bold mb-2">{{ team.name }}</h1>
+                <p class="text-xl text-indigo-100">{{ team.city }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-sm font-medium text-indigo-200 mb-2">Record</p>
+                <p class="text-5xl font-bold">{{ team.wins }}-{{ team.losses }}{% if team.ties > 0 %}-{{ team.ties }}{% endif %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+            <p class="text-sm font-medium text-gray-500">Wins</p>
+            <p class="text-3xl font-bold text-green-600">{{ team.wins }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+            <p class="text-sm font-medium text-gray-500">Losses</p>
+            <p class="text-3xl font-bold text-red-600">{{ team.losses }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+            <p class="text-sm font-medium text-gray-500">Ties</p>
+            <p class="text-3xl font-bold text-gray-600">{{ team.ties }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+            <p class="text-sm font-medium text-gray-500">Win %</p>
+            <p class="text-3xl font-bold text-indigo-600">
+                {% widthratio team.wins|add:team.losses|add:team.ties 1 1 as total_games %}
+                {% if total_games > 0 %}
+                    {% widthratio team.wins total_games 1000 as win_pct_raw %}
+                    .{{ win_pct_raw|stringformat:"03d" }}
+                {% else %}
+                    .000
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Recent Games -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-history text-gray-400 mr-3"></i>
+                Recent Games
+            </h2>
+        </div>
+        <div class="p-6">
+            {% if recent_games %}
+            <div class="space-y-3">
+                {% for game in recent_games %}
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div class="flex-1">
+                        <p class="text-xs text-gray-500 mb-1">{{ game.game_date|date:"M j, Y" }}</p>
+                        <div class="flex items-center space-x-2">
+                            {% if game.away_team.id == team.id %}
+                                <span class="text-xs font-medium text-gray-500">@</span>
+                                <span class="font-medium text-gray-900">{{ game.home_team.name }}</span>
+                            {% else %}
+                                <span class="text-xs font-medium text-gray-500">vs</span>
+                                <span class="font-medium text-gray-900">{{ game.away_team.name }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            {% if game.away_team.id == team.id %}
+                                <p class="text-lg font-bold {% if game.away_score > game.home_score %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {{ game.away_score }} - {{ game.home_score }}
+                                </p>
+                            {% else %}
+                                <p class="text-lg font-bold {% if game.home_score > game.away_score %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {{ game.home_score }} - {{ game.away_score }}
+                                </p>
+                            {% endif %}
+                            <p class="text-xs text-gray-500">
+                                {% if game.away_team.id == team.id %}
+                                    {% if game.away_score > game.home_score %}W{% elif game.away_score < game.home_score %}L{% else %}T{% endif %}
+                                {% else %}
+                                    {% if game.home_score > game.away_score %}W{% elif game.home_score < game.away_score %}L{% else %}T{% endif %}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <a href="{% url 'web:game_detail' game.id %}" class="text-indigo-600 hover:text-indigo-800">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center text-gray-500 py-8">No recent games found</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Upcoming Games -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-calendar-alt text-blue-400 mr-3"></i>
+                Upcoming Games
+            </h2>
+        </div>
+        <div class="p-6">
+            {% if upcoming_games %}
+            <div class="space-y-3">
+                {% for game in upcoming_games %}
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div class="flex-1">
+                        <p class="text-xs text-gray-500 mb-1">{{ game.game_date|date:"M j, Y" }} at {{ game.scheduled_time|date:"g:i A" }}</p>
+                        <div class="flex items-center space-x-2">
+                            {% if game.away_team.id == team.id %}
+                                <span class="text-xs font-medium text-gray-500">@</span>
+                                <span class="font-medium text-gray-900">{{ game.home_team.name }}</span>
+                            {% else %}
+                                <span class="text-xs font-medium text-gray-500">vs</span>
+                                <span class="font-medium text-gray-900">{{ game.away_team.name }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            Scheduled
+                        </span>
+                        <a href="{% url 'web:game_detail' game.id %}" class="text-indigo-600 hover:text-indigo-800">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center text-gray-500 py-8">No upcoming games scheduled</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Roster -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-users text-purple-400 mr-3"></i>
+                Roster ({{ roster.count }})
+            </h2>
+        </div>
+        <div class="p-6">
+            {% if roster %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for player in roster %}
+                <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                    <div class="flex-shrink-0 w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                        #{{ player.jersey_number }}
+                    </div>
+                    <div class="ml-4">
+                        <p class="font-medium text-gray-900">{{ player.name }}</p>
+                        <p class="text-sm text-gray-500">{{ player.position }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center text-gray-500 py-8">No players in roster</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="flex justify-between">
+        <a href="{% url 'web:standings' %}?league={{ team.league.id }}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back to Standings
+        </a>
+        <a href="{% url 'web:dashboard' %}" class="inline-flex items-center text-gray-600 hover:text-gray-800 font-medium">
+            <i class="fas fa-home mr-2"></i>
+            Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

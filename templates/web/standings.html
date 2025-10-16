@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Standings - Sports Game Tracker{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+            <i class="fas fa-list-ol text-green-500 mr-3"></i>
+            League Standings
+        </h1>
+        <p class="mt-2 text-gray-600">Team records and rankings</p>
+    </div>
+    
+    <!-- League Tabs -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+                {% for league in leagues %}
+                <a href="?league={{ league.id }}"
+                   class="{% if selected_league.id == league.id %}border-indigo-500 text-indigo-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    {{ league.name }}
+                </a>
+                {% endfor %}
+            </nav>
+        </div>
+        
+        <!-- Standings Table -->
+        <div class="p-6">
+            {% if teams %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Rank
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Team
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                W
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                L
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                T
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Win %
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for team in teams %}
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ forloop.counter }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div>
+                                        <a href="{% url 'web:team_detail' team.id %}" 
+                                           class="text-sm font-medium text-gray-900 hover:text-indigo-600">
+                                            {{ team.name }}
+                                        </a>
+                                        <div class="text-sm text-gray-500">
+                                            {{ team.city }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-green-600">
+                                {{ team.wins }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-red-600">
+                                {{ team.losses }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                                {{ team.ties }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
+                                {% widthratio team.wins 1 100 %}
+                                {% widthratio team.wins|add:team.losses|add:team.ties 1 1 as total_games %}
+                                {% if total_games > 0 %}
+                                    {% widthratio team.wins total_games 1000 as win_pct_raw %}
+                                    .{{ win_pct_raw|stringformat:"03d" }}
+                                {% else %}
+                                    .000
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-trophy text-6xl text-gray-300 mb-4"></i>
+                <p class="text-xl font-medium text-gray-900 mb-2">No Teams Found</p>
+                <p class="text-gray-500">No teams are available for this league.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Legend -->
+    <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-400"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-blue-700">
+                    <strong>W</strong> = Wins, <strong>L</strong> = Losses, <strong>T</strong> = Ties, <strong>Win %</strong> = Win Percentage
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
