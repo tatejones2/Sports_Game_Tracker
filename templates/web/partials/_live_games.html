@@ -1,9 +1,21 @@
 {% if live_games %}
     {% for game in live_games %}
-    <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-200 border-l-4 border-red-500">
+    <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-200 border-l-4 
+        {% if game.league.abbreviation == 'NFL' %}border-green-600
+        {% elif game.league.abbreviation == 'NBA' %}border-orange-500
+        {% elif game.league.abbreviation == 'MLB' %}border-blue-600
+        {% elif game.league.abbreviation == 'NHL' %}border-red-600
+        {% else %}border-red-500
+        {% endif %}">
         <!-- League and Status -->
         <div class="flex justify-between items-center mb-4">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                {% if game.league.abbreviation == 'NFL' %}bg-green-100 text-green-800
+                {% elif game.league.abbreviation == 'NBA' %}bg-orange-100 text-orange-800
+                {% elif game.league.abbreviation == 'MLB' %}bg-blue-100 text-blue-800
+                {% elif game.league.abbreviation == 'NHL' %}bg-red-100 text-red-800
+                {% else %}bg-indigo-100 text-indigo-800
+                {% endif %}">
                 {{ game.league.abbreviation }}
             </span>
             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 animate-pulse">
@@ -40,18 +52,28 @@
         <div class="space-y-3">
             <!-- Away Team -->
             <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <div>
-                    <div class="text-lg font-bold text-gray-900">{{ game.away_team.name }}</div>
-                    <div class="text-sm text-gray-500">{{ game.away_team.city }}</div>
+                <div class="flex items-center space-x-3">
+                    {% if game.away_team.logo_url %}
+                    <img src="{{ game.away_team.logo_url }}" alt="{{ game.away_team.abbreviation }}" class="w-12 h-12 object-contain">
+                    {% endif %}
+                    <div>
+                        <div class="text-lg font-bold text-gray-900">{{ game.away_team.name }}</div>
+                        <div class="text-sm text-gray-500">{{ game.away_team.city }}</div>
+                    </div>
                 </div>
                 <div class="text-3xl font-bold text-gray-900">{{ game.away_score }}</div>
             </div>
             
             <!-- Home Team -->
             <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <div>
-                    <div class="text-lg font-bold text-gray-900">{{ game.home_team.name }}</div>
-                    <div class="text-sm text-gray-500">{{ game.home_team.city }}</div>
+                <div class="flex items-center space-x-3">
+                    {% if game.home_team.logo_url %}
+                    <img src="{{ game.home_team.logo_url }}" alt="{{ game.home_team.abbreviation }}" class="w-12 h-12 object-contain">
+                    {% endif %}
+                    <div>
+                        <div class="text-lg font-bold text-gray-900">{{ game.home_team.name }}</div>
+                        <div class="text-sm text-gray-500">{{ game.home_team.city }}</div>
+                    </div>
                 </div>
                 <div class="text-3xl font-bold text-gray-900">{{ game.home_score }}</div>
             </div>
