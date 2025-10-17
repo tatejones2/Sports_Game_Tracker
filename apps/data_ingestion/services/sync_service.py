@@ -203,6 +203,10 @@ class SyncService:
                         "attendance": game_data.get("attendance"),
                         "broadcast_network": game_data.get("broadcast_network", ""),
                         "broadcast_info": game_data.get("broadcast_info"),
+                        "home_pitcher_name": game_data.get("home_pitcher_name", ""),
+                        "away_pitcher_name": game_data.get("away_pitcher_name", ""),
+                        "home_pitcher_stats": game_data.get("home_pitcher_stats"),
+                        "away_pitcher_stats": game_data.get("away_pitcher_stats"),
                     },
                 )
 

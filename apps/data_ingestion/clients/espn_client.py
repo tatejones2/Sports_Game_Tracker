@@ -256,6 +256,36 @@ class ESPNClient:
                     'networks': names
                 })
         
+        # Extract starting pitchers for MLB games
+        home_pitcher_name = ''
+        away_pitcher_name = ''
+        home_pitcher_stats = None
+        away_pitcher_stats = None
+        
+        # Check for probable pitchers in competitors
+        for competitor in competitors:
+            probables = competitor.get('probables', [])
+            for probable in probables:
+                if probable.get('name') == 'probableStartingPitcher':
+                    athlete = probable.get('athlete', {})
+                    pitcher_name = athlete.get('shortName', '')
+                    
+                    # Extract pitcher stats
+                    stats = {}
+                    for stat in probable.get('statistics', []):
+                        stat_name = stat.get('abbreviation', '')
+                        stat_value = stat.get('displayValue', '')
+                        if stat_name and stat_value:
+                            stats[stat_name] = stat_value
+                    
+                    # Assign to home or away based on competitor
+                    if competitor.get('homeAway') == 'home':
+                        home_pitcher_name = pitcher_name
+                        home_pitcher_stats = stats if stats else None
+                    else:
+                        away_pitcher_name = pitcher_name
+                        away_pitcher_stats = stats if stats else None
+        
         return {
             'id': event.get('id'),
             'home_team': {
@@ -289,7 +319,11 @@ class ESPNClient:
             'venue_capacity': venue_capacity,
             'attendance': attendance,
             'broadcast_network': broadcast_network,
-            'broadcast_info': broadcast_info if broadcast_info else None
+            'broadcast_info': broadcast_info if broadcast_info else None,
+            'home_pitcher_name': home_pitcher_name,
+            'away_pitcher_name': away_pitcher_name,
+            'home_pitcher_stats': home_pitcher_stats,
+            'away_pitcher_stats': away_pitcher_stats
         }
 
     def get_scoreboard(

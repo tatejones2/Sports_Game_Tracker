@@ -144,6 +144,12 @@ class Game(models.Model):
         help_text="Additional broadcast details (radio, streaming, etc.)"
     )
     
+    # MLB Starting Pitchers
+    home_pitcher_name = models.CharField(max_length=200, blank=True, default='', help_text="Home team starting pitcher")
+    away_pitcher_name = models.CharField(max_length=200, blank=True, default='', help_text="Away team starting pitcher")
+    home_pitcher_stats = models.JSONField(null=True, blank=True, help_text="Home pitcher statistics (W-L, ERA, etc.)")
+    away_pitcher_stats = models.JSONField(null=True, blank=True, help_text="Away pitcher statistics (W-L, ERA, etc.)")
+    
     external_id = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

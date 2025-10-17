@@ -59,6 +59,9 @@
                     <div>
                         <div class="text-lg font-bold text-gray-900">{{ game.away_team.name }}</div>
                         <div class="text-sm text-gray-500">{{ game.away_team.city }}</div>
+                        {% if game.league.abbreviation == 'MLB' and game.away_pitcher_name %}
+                        <div class="text-xs text-gray-600 mt-1">SP: {{ game.away_pitcher_name }}{% if game.away_pitcher_stats.W %} ({{ game.away_pitcher_stats.W }}-{{ game.away_pitcher_stats.L }}, {{ game.away_pitcher_stats.ERA }} ERA){% endif %}</div>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="text-3xl font-bold text-gray-900">{{ game.away_score }}</div>
@@ -73,6 +76,9 @@
                     <div>
                         <div class="text-lg font-bold text-gray-900">{{ game.home_team.name }}</div>
                         <div class="text-sm text-gray-500">{{ game.home_team.city }}</div>
+                        {% if game.league.abbreviation == 'MLB' and game.home_pitcher_name %}
+                        <div class="text-xs text-gray-600 mt-1">SP: {{ game.home_pitcher_name }}{% if game.home_pitcher_stats.W %} ({{ game.home_pitcher_stats.W }}-{{ game.home_pitcher_stats.L }}, {{ game.home_pitcher_stats.ERA }} ERA){% endif %}</div>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="text-3xl font-bold text-gray-900">{{ game.home_score }}</div>

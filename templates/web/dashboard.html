@@ -142,7 +142,12 @@
                                 {% if game.away_team.logo_url %}
                                 <img src="{{ game.away_team.logo_url }}" alt="{{ game.away_team.abbreviation }}" class="w-6 h-6 object-contain">
                                 {% endif %}
-                                <span class="text-sm font-medium text-gray-900">{{ game.away_team.name }}</span>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-900">{{ game.away_team.name }}</span>
+                                    {% if game.league.abbreviation == 'MLB' and game.away_pitcher_name %}
+                                    <div class="text-[10px] text-gray-500">{{ game.away_pitcher_name }}{% if game.away_pitcher_stats.W %} ({{ game.away_pitcher_stats.W }}-{{ game.away_pitcher_stats.L }}, {{ game.away_pitcher_stats.ERA }}){% endif %}</div>
+                                    {% endif %}
+                                </div>
                             </div>
                             <span class="text-xl font-bold text-gray-900">{{ game.away_score }}</span>
                         </div>
@@ -153,7 +158,12 @@
                                 {% if game.home_team.logo_url %}
                                 <img src="{{ game.home_team.logo_url }}" alt="{{ game.home_team.abbreviation }}" class="w-6 h-6 object-contain">
                                 {% endif %}
-                                <span class="text-sm font-medium text-gray-900">{{ game.home_team.name }}</span>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-900">{{ game.home_team.name }}</span>
+                                    {% if game.league.abbreviation == 'MLB' and game.home_pitcher_name %}
+                                    <div class="text-[10px] text-gray-500">{{ game.home_pitcher_name }}{% if game.home_pitcher_stats.W %} ({{ game.home_pitcher_stats.W }}-{{ game.home_pitcher_stats.L }}, {{ game.home_pitcher_stats.ERA }}){% endif %}</div>
+                                    {% endif %}
+                                </div>
                             </div>
                             <span class="text-xl font-bold text-gray-900">{{ game.home_score }}</span>
                         </div>
