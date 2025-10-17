@@ -344,3 +344,131 @@ class SyncService:
             logger.debug(
                 f"Created score for game {game.id}, period {score_data['period']}"
             )
+
+    def sync_team_details(self, team: Team) -> bool:
+        """
+        Sync detailed team stats and record from ESPN API.
+
+        Args:
+            team: Team instance to sync details for
+
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        if not team.external_id:
+            logger.warning(f"Team {team.id} has no external_id, skipping details sync")
+            return False
+
+        try:
+            details = self.espn_client.get_team_details(
+                team.league.abbreviation,
+                team.external_id
+            )
+            
+            if not details:
+                logger.warning(f"No details returned for team {team.id}")
+                return False
+            
+            # Update team with stats
+            team.wins = details.get('wins', team.wins)
+            team.losses = details.get('losses', team.losses)
+            team.ties = details.get('ties', team.ties)
+            team.games_played = details.get('games_played', 0)
+            team.points_for = details.get('points_for', 0.0)
+            team.points_against = details.get('points_against', 0.0)
+            team.differential = details.get('differential', 0.0)
+            team.division_win_percent = details.get('division_win_percent', 0.0)
+            team.games_behind = details.get('games_behind', 0.0)
+            team.save()
+            
+            logger.info(f"Synced details for team {team.full_name}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error syncing team details for {team.id}: {e}")
+            return False
+
+    def sync_team_roster(self, team: Team) -> Tuple[int, int]:
+        """
+        Sync team roster from ESPN API.
+
+        Args:
+            team: Team instance to sync roster for
+
+        Returns:
+            Tuple of (created_count, updated_count)
+        """
+        if not team.external_id:
+            logger.warning(f"Team {team.id} has no external_id, skipping roster sync")
+            return (0, 0)
+
+        created = 0
+        updated = 0
+
+        try:
+            roster_data = self.espn_client.get_team_roster(
+                team.league.abbreviation,
+                team.external_id
+            )
+            
+            athletes = roster_data.get('athletes', [])
+            logger.info(f"Fetched {len(athletes)} athletes for {team.full_name}")
+            
+            with transaction.atomic():
+                for athlete_data in athletes:
+                    player, was_created = Player.objects.update_or_create(
+                        external_id=athlete_data['external_id'],
+                        defaults={
+                            'team': team,
+                            'first_name': athlete_data.get('first_name', ''),
+                            'last_name': athlete_data.get('last_name', ''),
+                            'full_name': athlete_data.get('full_name', ''),
+                            'display_name': athlete_data.get('display_name', ''),
+                            'short_name': athlete_data.get('short_name', ''),
+                            'jersey_number': athlete_data.get('jersey_number', ''),
+                            'position': athlete_data.get('position', ''),
+                            'position_abbreviation': athlete_data.get('position_abbreviation', ''),
+                            'height': athlete_data.get('height', ''),
+                            'weight': athlete_data.get('weight', ''),
+                            'age': athlete_data.get('age'),
+                            'headshot_url': athlete_data.get('headshot_url'),
+                            'status': athlete_data.get('status', 'Active'),
+                        }
+                    )
+                    
+                    if was_created:
+                        created += 1
+                    else:
+                        updated += 1
+            
+            logger.info(f"Roster sync complete for {team.full_name}: {created} created, {updated} updated")
+            return (created, updated)
+            
+        except Exception as e:
+            logger.error(f"Error syncing roster for team {team.id}: {e}")
+            return (0, 0)
+
+    def sync_all_rosters(self, league_abbr: Optional[str] = None) -> Dict[str, Tuple[int, int]]:
+        """
+        Sync rosters for all teams, optionally filtered by league.
+
+        Args:
+            league_abbr: Optional league abbreviation to filter teams
+
+        Returns:
+            Dictionary mapping team names to (created, updated) counts
+        """
+        results = {}
+        
+        teams = Team.objects.select_related('league').all()
+        if league_abbr:
+            teams = teams.filter(league__abbreviation=league_abbr)
+        
+        for team in teams:
+            logger.info(f"Syncing roster for {team.full_name}...")
+            # Sync team details first
+            self.sync_team_details(team)
+            # Then sync roster
+            results[team.full_name] = self.sync_team_roster(team)
+        
+        return results

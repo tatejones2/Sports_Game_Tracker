@@ -47,6 +47,17 @@ class Team(models.Model):
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)
     ties = models.IntegerField(default=0)
+    
+    # Extended stats from ESPN API
+    games_played = models.IntegerField(default=0)
+    points_for = models.DecimalField(max_digits=6, decimal_places=1, default=0.0, help_text="Average points scored")
+    points_against = models.DecimalField(max_digits=6, decimal_places=1, default=0.0, help_text="Average points allowed")
+    differential = models.DecimalField(max_digits=6, decimal_places=1, default=0.0, help_text="Point differential")
+    division_win_percent = models.DecimalField(max_digits=5, decimal_places=3, default=0.0, help_text="Division win percentage")
+    games_behind = models.DecimalField(max_digits=4, decimal_places=1, default=0.0, help_text="Games behind leader")
+    conference_rank = models.IntegerField(null=True, blank=True, help_text="Conference ranking")
+    division_rank = models.IntegerField(null=True, blank=True, help_text="Division ranking")
+    
     logo_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -232,3 +243,51 @@ class Score(models.Model):
     
     def __str__(self):
         return f"Period {self.period}: {self.home_score}-{self.away_score}"
+
+
+class Player(models.Model):
+    """Player/Athlete model for team rosters."""
+    
+    external_id = models.CharField(max_length=50, unique=True, help_text="External API ID for this player")
+    team = models.ForeignKey(
+        Team,
+        on_delete=models.CASCADE,
+        related_name='players'
+    )
+    first_name = models.CharField(max_length=100, blank=True, default='')
+    last_name = models.CharField(max_length=100, blank=True, default='')
+    full_name = models.CharField(max_length=200, blank=True, default='')
+    display_name = models.CharField(max_length=200, blank=True, default='')
+    short_name = models.CharField(max_length=100, blank=True, default='')
+    
+    # Physical attributes
+    jersey_number = models.CharField(max_length=5, blank=True)
+    position = models.CharField(max_length=50, blank=True)
+    position_abbreviation = models.CharField(max_length=10, blank=True)
+    height = models.CharField(max_length=20, blank=True, help_text="Display height (e.g., 6' 5\")")
+    weight = models.CharField(max_length=20, blank=True, help_text="Display weight (e.g., 210 lbs)")
+    age = models.IntegerField(null=True, blank=True)
+    
+    # Media
+    headshot_url = models.URLField(blank=True, null=True)
+    
+    # Status
+    status = models.CharField(max_length=50, default='Active')
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['team', 'last_name', 'first_name']
+        verbose_name = 'Player'
+        verbose_name_plural = 'Players'
+        indexes = [
+            models.Index(fields=['team', 'jersey_number']),
+            models.Index(fields=['team', 'position_abbreviation']),
+        ]
+    
+    def __str__(self):
+        if self.jersey_number:
+            return f"#{self.jersey_number} {self.full_name} ({self.team.abbreviation})"
+        return f"{self.full_name} ({self.team.abbreviation})"

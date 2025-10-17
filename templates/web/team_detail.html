@@ -27,7 +27,7 @@
     </div>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div class="bg-white rounded-lg shadow p-4 text-center">
             <p class="text-sm font-medium text-gray-500">Wins</p>
             <p class="text-3xl font-bold text-green-600">{{ team.wins }}</p>
@@ -35,10 +35,6 @@
         <div class="bg-white rounded-lg shadow p-4 text-center">
             <p class="text-sm font-medium text-gray-500">Losses</p>
             <p class="text-3xl font-bold text-red-600">{{ team.losses }}</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4 text-center">
-            <p class="text-sm font-medium text-gray-500">Ties</p>
-            <p class="text-3xl font-bold text-gray-600">{{ team.ties }}</p>
         </div>
         <div class="bg-white rounded-lg shadow p-4 text-center">
             <p class="text-sm font-medium text-gray-500">Win %</p>
@@ -52,7 +48,51 @@
                 {% endif %}
             </p>
         </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+            <p class="text-sm font-medium text-gray-500">Pts For</p>
+            <p class="text-3xl font-bold text-blue-600">{{ team.points_for|floatformat:1 }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+            <p class="text-sm font-medium text-gray-500">Pts Against</p>
+            <p class="text-3xl font-bold text-orange-600">{{ team.points_against|floatformat:1 }}</p>
+        </div>
     </div>
+
+    <!-- Team Stats -->
+    {% if team.games_played > 0 %}
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-chart-bar text-indigo-400 mr-3"></i>
+                Team Statistics
+            </h2>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 mb-1">Games Played</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ team.games_played }}</p>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500 mb-1">Point Differential</p>
+                    <p class="text-2xl font-bold {% if team.differential >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                        {% if team.differential > 0 %}+{% endif %}{{ team.differential|floatformat:1 }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500 mb-1">Division Win %</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ team.division_win_percent|floatformat:3 }}</p>
+                </div>
+                {% if team.games_behind > 0 %}
+                <div>
+                    <p class="text-sm font-medium text-gray-500 mb-1">Games Behind</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ team.games_behind|floatformat:1 }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Recent Games -->
     <div class="bg-white rounded-lg shadow">
@@ -183,21 +223,67 @@
         </div>
         <div class="p-6">
             {% if roster %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {% for player in roster %}
-                <div class="flex items-center p-4 bg-gray-50 rounded-lg">
-                    <div class="flex-shrink-0 w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
-                        #{{ player.jersey_number }}
-                    </div>
-                    <div class="ml-4">
-                        <p class="font-medium text-gray-900">{{ player.name }}</p>
-                        <p class="text-sm text-gray-500">{{ player.position }}</p>
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Height</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weight</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for player in roster %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm font-bold text-indigo-600">#{{ player.jersey_number|default:"--" }}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    {% if player.headshot_url %}
+                                    <img src="{{ player.headshot_url }}" 
+                                         alt="{{ player.full_name }}" 
+                                         class="w-10 h-10 rounded-full object-cover mr-3">
+                                    {% else %}
+                                    <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user text-gray-500"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">{{ player.full_name }}</p>
+                                        {% if player.status != 'Active' %}
+                                        <p class="text-xs text-gray-500">{{ player.status }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    {{ player.position_abbreviation|default:player.position|default:"--" }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ player.height|default:"--" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ player.weight|default:"--" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ player.age|default:"--" }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             {% else %}
-            <p class="text-center text-gray-500 py-8">No players in roster</p>
+            <p class="text-center text-gray-500 py-8">
+                <i class="fas fa-info-circle text-3xl mb-3"></i><br>
+                No roster data available. Run the roster sync to populate player information.
+            </p>
             {% endif %}
         </div>
     </div>

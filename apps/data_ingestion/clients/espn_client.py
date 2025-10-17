@@ -537,3 +537,161 @@ class ESPNClient:
                         continue
         
         return teams
+
+    def get_team_details(self, league: str, team_id: str) -> Dict[str, Any]:
+        """
+        Fetch detailed team information including stats and record.
+
+        Args:
+            league: League abbreviation (e.g., 'nba', 'nfl')
+            team_id: Team's external ID
+
+        Returns:
+            Dictionary containing team details and stats
+        """
+        url = self.get_team_url(league, team_id)
+        
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            return self.parse_team_details(data)
+        except requests.RequestException as e:
+            logger.error(f"Error fetching team details for {team_id}: {e}")
+            return {}
+    
+    def get_team_roster(self, league: str, team_id: str) -> Dict[str, Any]:
+        """
+        Fetch team roster information.
+
+        Args:
+            league: League abbreviation (e.g., 'nba', 'nfl')
+            team_id: Team's external ID
+
+        Returns:
+            Dictionary containing roster data
+        """
+        url = self.get_team_roster_url(league, team_id)
+        
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            return self.parse_team_roster(data, team_id)
+        except requests.RequestException as e:
+            logger.error(f"Error fetching team roster for {team_id}: {e}")
+            return {'athletes': []}
+    
+    def get_team_url(self, league: str, team_id: str) -> str:
+        """Build URL for team details endpoint."""
+        sport = self.LEAGUE_SPORTS.get(league.upper())
+        if not sport:
+            raise ValueError(f"Unsupported league: {league}")
+        
+        league_lower = league.lower()
+        return f"{self.BASE_URL}/sports/{sport}/{league_lower}/teams/{team_id}"
+    
+    def get_team_roster_url(self, league: str, team_id: str) -> str:
+        """Build URL for team roster endpoint."""
+        sport = self.LEAGUE_SPORTS.get(league.upper())
+        if not sport:
+            raise ValueError(f"Unsupported league: {league}")
+        
+        league_lower = league.lower()
+        return f"{self.BASE_URL}/sports/{sport}/{league_lower}/teams/{team_id}/roster"
+    
+    def parse_team_details(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Parse team details data into normalized format.
+
+        Args:
+            data: Raw team details data from ESPN API
+
+        Returns:
+            Dictionary with team stats and record
+        """
+        team_data = data.get('team', {})
+        record_data = team_data.get('record', {}).get('items', [])
+        
+        result = {
+            'external_id': team_data.get('id'),
+            'wins': 0,
+            'losses': 0,
+            'ties': 0,
+            'games_played': 0,
+            'points_for': 0.0,
+            'points_against': 0.0,
+            'differential': 0.0,
+            'division_win_percent': 0.0,
+            'games_behind': 0.0,
+        }
+        
+        # Parse overall record
+        for record_item in record_data:
+            if record_item.get('type') == 'total':
+                stats = {stat['name']: stat.get('value', 0) for stat in record_item.get('stats', [])}
+                
+                result['games_played'] = int(stats.get('gamesPlayed', 0))
+                result['points_for'] = float(stats.get('avgPointsFor', 0))
+                result['points_against'] = float(stats.get('avgPointsAgainst', 0))
+                result['differential'] = float(stats.get('differential', 0))
+                result['division_win_percent'] = float(stats.get('divisionWinPercent', 0))
+                result['games_behind'] = float(stats.get('gamesBehind', 0))
+                
+                # Parse summary for W-L-T
+                summary = record_item.get('summary', '0-0')
+                parts = summary.split('-')
+                if len(parts) >= 2:
+                    result['wins'] = int(parts[0])
+                    result['losses'] = int(parts[1])
+                if len(parts) >= 3:
+                    result['ties'] = int(parts[2])
+                
+                break
+        
+        return result
+    
+    def parse_team_roster(self, data: Dict[str, Any], team_id: str) -> Dict[str, Any]:
+        """
+        Parse team roster data into normalized format.
+
+        Args:
+            data: Raw roster data from ESPN API
+            team_id: Team's external ID
+
+        Returns:
+            Dictionary with list of athletes/players
+        """
+        athletes = []
+        
+        for athlete_data in data.get('athletes', []):
+            try:
+                position = athlete_data.get('position', {})
+                headshot = None
+                
+                # Get headshot from athlete's headshot field
+                if athlete_data.get('headshot'):
+                    headshot = athlete_data['headshot'].get('href')
+                
+                athletes.append({
+                    'external_id': athlete_data['id'],
+                    'team_external_id': team_id,
+                    'first_name': athlete_data.get('firstName', ''),
+                    'last_name': athlete_data.get('lastName', ''),
+                    'full_name': athlete_data.get('fullName', ''),
+                    'display_name': athlete_data.get('displayName', ''),
+                    'short_name': athlete_data.get('shortName', ''),
+                    'jersey_number': str(athlete_data.get('jersey', '')),
+                    'position': position.get('name', ''),
+                    'position_abbreviation': position.get('abbreviation', ''),
+                    'height': athlete_data.get('displayHeight', ''),
+                    'weight': athlete_data.get('displayWeight', ''),
+                    'age': athlete_data.get('age'),
+                    'headshot_url': headshot,
+                    'status': athlete_data.get('status', {}).get('name', 'Active'),
+                })
+            except (KeyError, TypeError) as e:
+                logger.error(f"Error parsing athlete {athlete_data.get('id')}: {e}")
+                continue
+        
+        return {'athletes': athletes}
