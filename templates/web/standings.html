@@ -59,6 +59,11 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
+                                    {% if team.logo_url %}
+                                    <img src="{{ team.logo_url }}" 
+                                         alt="{{ team.name }}" 
+                                         class="w-8 h-8 object-contain mr-3">
+                                    {% endif %}
                                     <div>
                                         <a href="{% url 'web:team_detail' team.id %}" 
                                            class="text-sm font-medium text-gray-900 hover:text-indigo-600">

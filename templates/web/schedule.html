@@ -83,11 +83,21 @@
         {% if games %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for game in games %}
-            <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-200">
+            <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border-t-4 
+                {% if game.league.abbreviation == 'NFL' %}border-green-600
+                {% elif game.league.abbreviation == 'NBA' %}border-orange-500
+                {% elif game.league.abbreviation == 'MLB' %}border-blue-600
+                {% elif game.league.abbreviation == 'NHL' %}border-red-600
+                {% else %}border-indigo-600{% endif %}">
                 <div class="p-6">
                     <!-- League and Status -->
                     <div class="flex justify-between items-center mb-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                            {% if game.league.abbreviation == 'NFL' %}bg-green-100 text-green-800
+                            {% elif game.league.abbreviation == 'NBA' %}bg-orange-100 text-orange-800
+                            {% elif game.league.abbreviation == 'MLB' %}bg-blue-100 text-blue-800
+                            {% elif game.league.abbreviation == 'NHL' %}bg-red-100 text-red-800
+                            {% else %}bg-indigo-100 text-indigo-800{% endif %}">
                             {{ game.league.abbreviation }}
                         </span>
                         {% if game.status == 'live' %}
@@ -110,19 +120,33 @@
                     <div class="space-y-3">
                         <!-- Away Team -->
                         <div class="flex justify-between items-center">
-                            <a href="{% url 'web:team_detail' game.away_team.id %}" 
-                               class="text-sm font-medium text-gray-900 hover:text-indigo-600">
-                                {{ game.away_team.name }}
-                            </a>
+                            <div class="flex items-center space-x-2 flex-1">
+                                {% if game.away_team.logo_url %}
+                                <img src="{{ game.away_team.logo_url }}" 
+                                     alt="{{ game.away_team.name }}" 
+                                     class="w-6 h-6 object-contain">
+                                {% endif %}
+                                <a href="{% url 'web:team_detail' game.away_team.id %}" 
+                                   class="text-sm font-medium text-gray-900 hover:text-indigo-600">
+                                    {{ game.away_team.name }}
+                                </a>
+                            </div>
                             <span class="text-xl font-bold text-gray-900">{{ game.away_score }}</span>
                         </div>
                         
                         <!-- Home Team -->
                         <div class="flex justify-between items-center">
-                            <a href="{% url 'web:team_detail' game.home_team.id %}" 
-                               class="text-sm font-medium text-gray-900 hover:text-indigo-600">
-                                {{ game.home_team.name }}
-                            </a>
+                            <div class="flex items-center space-x-2 flex-1">
+                                {% if game.home_team.logo_url %}
+                                <img src="{{ game.home_team.logo_url }}" 
+                                     alt="{{ game.home_team.name }}" 
+                                     class="w-6 h-6 object-contain">
+                                {% endif %}
+                                <a href="{% url 'web:team_detail' game.home_team.id %}" 
+                                   class="text-sm font-medium text-gray-900 hover:text-indigo-600">
+                                    {{ game.home_team.name }}
+                                </a>
+                            </div>
                             <span class="text-xl font-bold text-gray-900">{{ game.home_score }}</span>
                         </div>
                     </div>

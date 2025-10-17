@@ -7,10 +7,17 @@
     <!-- Team Header -->
     <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-lg shadow-lg p-8 text-white">
         <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-indigo-200 mb-2">{{ team.league.abbreviation }}</p>
-                <h1 class="text-4xl font-bold mb-2">{{ team.name }}</h1>
-                <p class="text-xl text-indigo-100">{{ team.city }}</p>
+            <div class="flex items-center space-x-6">
+                {% if team.logo_url %}
+                <img src="{{ team.logo_url }}" 
+                     alt="{{ team.name }}" 
+                     class="w-24 h-24 object-contain">
+                {% endif %}
+                <div>
+                    <p class="text-sm font-medium text-indigo-200 mb-2">{{ team.league.abbreviation }}</p>
+                    <h1 class="text-4xl font-bold mb-2">{{ team.name }}</h1>
+                    <p class="text-xl text-indigo-100">{{ team.city }}</p>
+                </div>
             </div>
             <div class="text-right">
                 <p class="text-sm font-medium text-indigo-200 mb-2">Record</p>
@@ -64,9 +71,19 @@
                         <p class="text-xs text-gray-500 mb-1">{{ game.game_date|date:"M j, Y" }}</p>
                         <div class="flex items-center space-x-2">
                             {% if game.away_team.id == team.id %}
+                                {% if game.home_team.logo_url %}
+                                <img src="{{ game.home_team.logo_url }}" 
+                                     alt="{{ game.home_team.name }}" 
+                                     class="w-5 h-5 object-contain">
+                                {% endif %}
                                 <span class="text-xs font-medium text-gray-500">@</span>
                                 <span class="font-medium text-gray-900">{{ game.home_team.name }}</span>
                             {% else %}
+                                {% if game.away_team.logo_url %}
+                                <img src="{{ game.away_team.logo_url }}" 
+                                     alt="{{ game.away_team.name }}" 
+                                     class="w-5 h-5 object-contain">
+                                {% endif %}
                                 <span class="text-xs font-medium text-gray-500">vs</span>
                                 <span class="font-medium text-gray-900">{{ game.away_team.name }}</span>
                             {% endif %}
@@ -121,9 +138,19 @@
                         <p class="text-xs text-gray-500 mb-1">{{ game.game_date|date:"M j, Y" }} at {{ game.scheduled_time|date:"g:i A" }}</p>
                         <div class="flex items-center space-x-2">
                             {% if game.away_team.id == team.id %}
+                                {% if game.home_team.logo_url %}
+                                <img src="{{ game.home_team.logo_url }}" 
+                                     alt="{{ game.home_team.name }}" 
+                                     class="w-5 h-5 object-contain">
+                                {% endif %}
                                 <span class="text-xs font-medium text-gray-500">@</span>
                                 <span class="font-medium text-gray-900">{{ game.home_team.name }}</span>
                             {% else %}
+                                {% if game.away_team.logo_url %}
+                                <img src="{{ game.away_team.logo_url }}" 
+                                     alt="{{ game.away_team.name }}" 
+                                     class="w-5 h-5 object-contain">
+                                {% endif %}
                                 <span class="text-xs font-medium text-gray-500">vs</span>
                                 <span class="font-medium text-gray-900">{{ game.away_team.name }}</span>
                             {% endif %}
