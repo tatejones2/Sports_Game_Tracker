@@ -584,21 +584,23 @@ class ESPNClient:
     
     def get_team_url(self, league: str, team_id: str) -> str:
         """Build URL for team details endpoint."""
-        sport = self.LEAGUE_SPORTS.get(league.upper())
-        if not sport:
+        mapping = self.SPORT_MAPPINGS.get(league.upper())
+        if not mapping:
             raise ValueError(f"Unsupported league: {league}")
         
-        league_lower = league.lower()
-        return f"{self.BASE_URL}/sports/{sport}/{league_lower}/teams/{team_id}"
+        sport = mapping['sport']
+        league_slug = mapping['league']
+        return f"{self.BASE_URL}/{sport}/{league_slug}/teams/{team_id}"
     
     def get_team_roster_url(self, league: str, team_id: str) -> str:
         """Build URL for team roster endpoint."""
-        sport = self.LEAGUE_SPORTS.get(league.upper())
-        if not sport:
+        mapping = self.SPORT_MAPPINGS.get(league.upper())
+        if not mapping:
             raise ValueError(f"Unsupported league: {league}")
         
-        league_lower = league.lower()
-        return f"{self.BASE_URL}/sports/{sport}/{league_lower}/teams/{team_id}/roster"
+        sport = mapping['sport']
+        league_slug = mapping['league']
+        return f"{self.BASE_URL}/{sport}/{league_slug}/teams/{team_id}/roster"
     
     def parse_team_details(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
