@@ -164,7 +164,6 @@ class SyncService:
 
                 # Parse scheduled time
                 scheduled_time = None
-                game_date = None
                 if game_data.get("scheduled_time"):
                     try:
                         # Handle ISO format with 'Z' suffix (convert to +00:00)
@@ -176,15 +175,14 @@ class SyncService:
                             scheduled_time = timezone.localtime(scheduled_time, timezone=timezone.get_current_timezone())
                         else:
                             scheduled_time = timezone.make_aware(scheduled_time)
-                        game_date = scheduled_time
                     except (ValueError, TypeError) as e:
                         logger.warning(
                             f"Could not parse scheduled_time: {game_data.get('scheduled_time')} - {e}"
                         )
                 
-                # Use date parameter as fallback for game_date
-                if game_date is None:
-                    game_date = timezone.make_aware(datetime.combine(date, datetime.min.time()))
+                # game_date should always be set to the date parameter (the day the game is on)
+                # scheduled_time has the exact time
+                game_date = timezone.make_aware(datetime.combine(date, datetime.min.time()))
 
                 # Create or update game
                 game, is_created = Game.objects.update_or_create(
