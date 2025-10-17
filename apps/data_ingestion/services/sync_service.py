@@ -167,13 +167,19 @@ class SyncService:
                 game_date = None
                 if game_data.get("scheduled_time"):
                     try:
-                        scheduled_time = timezone.make_aware(
-                            datetime.fromisoformat(game_data["scheduled_time"])
-                        )
+                        # Handle ISO format with 'Z' suffix (convert to +00:00)
+                        time_str = game_data["scheduled_time"].replace('Z', '+00:00')
+                        # fromisoformat returns an aware datetime when timezone is in the string
+                        scheduled_time = datetime.fromisoformat(time_str)
+                        # Ensure it's in the correct timezone
+                        if timezone.is_aware(scheduled_time):
+                            scheduled_time = timezone.localtime(scheduled_time, timezone=timezone.get_current_timezone())
+                        else:
+                            scheduled_time = timezone.make_aware(scheduled_time)
                         game_date = scheduled_time
-                    except (ValueError, TypeError):
+                    except (ValueError, TypeError) as e:
                         logger.warning(
-                            f"Could not parse scheduled_time: {game_data.get('scheduled_time')}"
+                            f"Could not parse scheduled_time: {game_data.get('scheduled_time')} - {e}"
                         )
                 
                 # Use date parameter as fallback for game_date

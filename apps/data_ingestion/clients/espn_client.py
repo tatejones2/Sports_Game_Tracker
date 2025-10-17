@@ -479,6 +479,7 @@ class ESPNClient:
                 game = {
                     'external_id': event['id'],
                     'game_date': game_date,
+                    'scheduled_time': event['date'],  # ISO format string for the sync service
                     'status': self.normalize_status(status['type']['name']),
                     'home_team': {
                         'external_id': home_team['id'],
