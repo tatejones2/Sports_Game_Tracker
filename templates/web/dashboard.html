@@ -141,7 +141,121 @@
                         </div>
                     </div>
                     
-                    <!-- Box Score (for MLB games with box score data) -->
+                    <!-- NFL Box Score (Quarter by Quarter) -->
+                    {% if game.league.abbreviation == 'NFL' and game.box_score %}
+                        <div class="mt-3 pt-3 border-t border-gray-200 overflow-x-auto">
+                            <table class="w-full text-xs text-gray-700">
+                                <thead>
+                                    <tr class="text-gray-500">
+                                        <th class="text-left px-2"></th>
+                                        <th class="text-center px-2">Q1</th>
+                                        <th class="text-center px-2">Q2</th>
+                                        <th class="text-center px-2">Q3</th>
+                                        <th class="text-center px-2">Q4</th>
+                                        <th class="text-center px-2 font-bold text-gray-900">T</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="text-left px-2 font-semibold">{{ game.away_team.abbreviation }}</td>
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.0 %}{{ game.box_score.away_linescores.0 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.1 %}{{ game.box_score.away_linescores.1 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.2 %}{{ game.box_score.away_linescores.2 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.3 %}{{ game.box_score.away_linescores.3 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2 font-bold">{{ game.away_score }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left px-2 font-semibold">{{ game.home_team.abbreviation }}</td>
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.0 %}{{ game.box_score.home_linescores.0 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.1 %}{{ game.box_score.home_linescores.1 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.2 %}{{ game.box_score.home_linescores.2 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.3 %}{{ game.box_score.home_linescores.3 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2 font-bold">{{ game.home_score }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- NBA Box Score (Quarter by Quarter) -->
+                    {% if game.league.abbreviation == 'NBA' and game.box_score %}
+                        <div class="mt-3 pt-3 border-t border-gray-200 overflow-x-auto">
+                            <table class="w-full text-xs text-gray-700">
+                                <thead>
+                                    <tr class="text-gray-500">
+                                        <th class="text-left px-2"></th>
+                                        <th class="text-center px-2">Q1</th>
+                                        <th class="text-center px-2">Q2</th>
+                                        <th class="text-center px-2">Q3</th>
+                                        <th class="text-center px-2">Q4</th>
+                                        <th class="text-center px-2 font-bold text-gray-900">T</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="text-left px-2 font-semibold">{{ game.away_team.abbreviation }}</td>
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.0 %}{{ game.box_score.away_linescores.0 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.1 %}{{ game.box_score.away_linescores.1 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.2 %}{{ game.box_score.away_linescores.2 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.3 %}{{ game.box_score.away_linescores.3 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2 font-bold">{{ game.away_score }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left px-2 font-semibold">{{ game.home_team.abbreviation }}</td>
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.0 %}{{ game.box_score.home_linescores.0 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.1 %}{{ game.box_score.home_linescores.1 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.2 %}{{ game.box_score.home_linescores.2 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.3 %}{{ game.box_score.home_linescores.3 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2 font-bold">{{ game.home_score }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- NHL Box Score (Period by Period) -->
+                    {% if game.league.abbreviation == 'NHL' and game.box_score %}
+                        <div class="mt-3 pt-3 border-t border-gray-200 overflow-x-auto">
+                            <table class="w-full text-xs text-gray-700">
+                                <thead>
+                                    <tr class="text-gray-500">
+                                        <th class="text-left px-2"></th>
+                                        <th class="text-center px-2">1st</th>
+                                        <th class="text-center px-2">2nd</th>
+                                        <th class="text-center px-2">3rd</th>
+                                        {% if game.box_score.away_linescores.3 or game.box_score.home_linescores.3 %}
+                                        <th class="text-center px-2">OT</th>
+                                        {% endif %}
+                                        <th class="text-center px-2 font-bold text-gray-900">T</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="text-left px-2 font-semibold">{{ game.away_team.abbreviation }}</td>
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.0 %}{{ game.box_score.away_linescores.0 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.1 %}{{ game.box_score.away_linescores.1 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.2 %}{{ game.box_score.away_linescores.2 }}{% else %}-{% endif %}</td>
+                                        {% if game.box_score.away_linescores.3 or game.box_score.home_linescores.3 %}
+                                        <td class="text-center px-2">{% if game.box_score.away_linescores.3 %}{{ game.box_score.away_linescores.3 }}{% else %}-{% endif %}</td>
+                                        {% endif %}
+                                        <td class="text-center px-2 font-bold">{{ game.away_score }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left px-2 font-semibold">{{ game.home_team.abbreviation }}</td>
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.0 %}{{ game.box_score.home_linescores.0 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.1 %}{{ game.box_score.home_linescores.1 }}{% else %}-{% endif %}</td>
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.2 %}{{ game.box_score.home_linescores.2 }}{% else %}-{% endif %}</td>
+                                        {% if game.box_score.away_linescores.3 or game.box_score.home_linescores.3 %}
+                                        <td class="text-center px-2">{% if game.box_score.home_linescores.3 %}{{ game.box_score.home_linescores.3 }}{% else %}-{% endif %}</td>
+                                        {% endif %}
+                                        <td class="text-center px-2 font-bold">{{ game.home_score }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- MLB Box Score (Inning by Inning) -->
                     {% if game.league.abbreviation == 'MLB' and game.box_score %}
                         <div class="mt-3 pt-3 border-t border-gray-200 overflow-x-auto">
                             <table class="w-full text-[10px] font-mono text-gray-700">
