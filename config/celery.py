@@ -36,6 +36,10 @@ app.conf.beat_schedule = {
         "schedule": 60.0,  # Every 60 seconds
         "options": {"expires": 55},  # Expire if not executed within 55 seconds
     },
+    "sync-new-day-at-midnight": {
+        "task": "apps.data_ingestion.tasks.sync_new_day_games",
+        "schedule": crontab(hour=0, minute=1),  # Every day at 12:01 AM
+    },
     "sync-daily-schedule-hourly": {
         "task": "apps.data_ingestion.tasks.sync_daily_schedule",
         "schedule": crontab(minute=0),  # Every hour at minute 0

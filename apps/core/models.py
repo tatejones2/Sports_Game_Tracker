@@ -131,6 +131,19 @@ class Game(models.Model):
         help_text="Inning-by-inning line scores and game statistics"
     )
     
+    # Venue and broadcast information
+    venue_name = models.CharField(max_length=200, blank=True, default='', help_text="Stadium/arena name")
+    venue_city = models.CharField(max_length=100, blank=True, default='', help_text="Venue city")
+    venue_state = models.CharField(max_length=100, blank=True, default='', help_text="Venue state/province")
+    venue_capacity = models.IntegerField(null=True, blank=True, help_text="Venue capacity")
+    attendance = models.IntegerField(null=True, blank=True, help_text="Game attendance")
+    broadcast_network = models.CharField(max_length=100, blank=True, default='', help_text="TV network (e.g., ESPN, ABC)")
+    broadcast_info = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional broadcast details (radio, streaming, etc.)"
+    )
+    
     external_id = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

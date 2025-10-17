@@ -12,6 +12,30 @@
             </span>
         </div>
         
+        <!-- Venue & Broadcast Info -->
+        {% if game.venue_name or game.broadcast_network %}
+        <div class="mb-4 pb-4 border-b border-gray-200">
+            {% if game.venue_name %}
+            <div class="text-sm text-gray-600 flex items-center mb-2">
+                <i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>
+                <span class="truncate">{{ game.venue_name }}{% if game.venue_city %}, {{ game.venue_city }}{% if game.venue_state %}, {{ game.venue_state }}{% endif %}{% endif %}</span>
+            </div>
+            {% endif %}
+            {% if game.broadcast_network %}
+            <div class="text-sm text-gray-600 flex items-center">
+                <i class="fas fa-tv mr-2 text-gray-400"></i>
+                <span class="font-medium">{{ game.broadcast_network }}</span>
+            </div>
+            {% endif %}
+            {% if game.attendance %}
+            <div class="text-sm text-gray-600 flex items-center mt-2">
+                <i class="fas fa-users mr-2 text-gray-400"></i>
+                <span>{{ game.attendance|intcomma }} fans</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
         <!-- Game Score -->
         <div class="space-y-3">
             <!-- Away Team -->

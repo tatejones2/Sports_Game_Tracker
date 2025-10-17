@@ -196,6 +196,13 @@ class SyncService:
                         "time_remaining": game_data.get("clock", ""),
                         "situation": game_data.get("situation"),
                         "box_score": game_data.get("box_score"),
+                        "venue_name": game_data.get("venue_name", ""),
+                        "venue_city": game_data.get("venue_city", ""),
+                        "venue_state": game_data.get("venue_state", ""),
+                        "venue_capacity": game_data.get("venue_capacity"),
+                        "attendance": game_data.get("attendance"),
+                        "broadcast_network": game_data.get("broadcast_network", ""),
+                        "broadcast_info": game_data.get("broadcast_info"),
                     },
                 )
 

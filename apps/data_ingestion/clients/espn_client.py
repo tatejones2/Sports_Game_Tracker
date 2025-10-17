@@ -211,8 +211,11 @@ class ESPNClient:
         home_linescores = [ls.get('displayValue', '-') for ls in home_competitor.get('linescores', [])]
         away_linescores = [ls.get('displayValue', '-') for ls in away_competitor.get('linescores', [])]
         
-        # Extract statistics (hits, errors)
+        # Extract statistics (hits, errors) - only for live/final games
         def get_stat(competitor, stat_name):
+            # Only get stats if game is live or final (not scheduled)
+            if status in ['scheduled', 'postponed', 'cancelled']:
+                return '0'
             for stat in competitor.get('statistics', []):
                 if stat.get('name') == stat_name:
                     return stat.get('displayValue', '0')
@@ -226,6 +229,32 @@ class ESPNClient:
             'hits': get_stat(away_competitor, 'hits'),
             'errors': get_stat(away_competitor, 'errors')
         }
+        
+        # Extract venue information
+        venue = competition.get('venue', {})
+        venue_name = venue.get('fullName', '')
+        venue_city = venue.get('address', {}).get('city', '')
+        venue_state = venue.get('address', {}).get('state', '')
+        venue_capacity = venue.get('capacity')
+        
+        # Extract attendance
+        attendance = competition.get('attendance')
+        
+        # Extract broadcast information
+        broadcasts = competition.get('broadcasts', [])
+        broadcast_network = ''
+        broadcast_info = []
+        
+        for broadcast in broadcasts:
+            network = broadcast.get('market', '')
+            names = broadcast.get('names', [])
+            if names:
+                if not broadcast_network:  # First network becomes primary
+                    broadcast_network = names[0]
+                broadcast_info.append({
+                    'market': network,
+                    'networks': names
+                })
         
         return {
             'id': event.get('id'),
@@ -253,7 +282,14 @@ class ESPNClient:
                 'away_linescores': away_linescores,
                 'home_stats': home_stats,
                 'away_stats': away_stats
-            }
+            },
+            'venue_name': venue_name,
+            'venue_city': venue_city,
+            'venue_state': venue_state,
+            'venue_capacity': venue_capacity,
+            'attendance': attendance,
+            'broadcast_network': broadcast_network,
+            'broadcast_info': broadcast_info if broadcast_info else None
         }
 
     def get_scoreboard(

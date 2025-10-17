@@ -117,13 +117,13 @@
                         </span>
                         {% else %}
                         <span class="text-xs text-gray-500">
-                            {{ game.scheduled_time|date:"g:i A" }}
+                            {{ game.game_date|date:"g:i A" }}
                         </span>
                         {% endif %}
                     </div>
                     
                     <!-- Teams and Scores -->
-                    <div class="space-y-2">
+                    <div class="space-y-2 mb-3">
                         <!-- Away Team -->
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -198,6 +198,24 @@
                                 </tbody>
                             </table>
                         </div>
+                    {% endif %}
+                    
+                    <!-- Venue & Broadcast Info -->
+                    {% if game.venue_name or game.broadcast_network %}
+                    <div class="mt-3 pt-3 border-t border-gray-200">
+                        {% if game.venue_name %}
+                        <div class="text-xs text-gray-600 flex items-center mb-1">
+                            <i class="fas fa-map-marker-alt mr-1.5 text-gray-400"></i>
+                            <span class="truncate">{{ game.venue_name }}{% if game.venue_city %}, {{ game.venue_city }}{% if game.venue_state %}, {{ game.venue_state }}{% endif %}{% endif %}</span>
+                        </div>
+                        {% endif %}
+                        {% if game.broadcast_network %}
+                        <div class="text-xs text-gray-600 flex items-center">
+                            <i class="fas fa-tv mr-1.5 text-gray-400"></i>
+                            <span>{{ game.broadcast_network }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
                     {% endif %}
                     
                     <!-- Situation Info (for live games with situation data) -->

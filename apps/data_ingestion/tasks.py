@@ -104,6 +104,50 @@ def sync_daily_schedule(self):
 @shared_task(
     bind=True,
     autoretry_for=(Exception,),
+    retry_kwargs={"max_retries": 5, "countdown": 120},
+    time_limit=900,  # 15 minutes
+)
+def sync_new_day_games(self):
+    """
+    Sync games for the new day at midnight.
+
+    This task runs at midnight to automatically fetch today's games
+    so they appear on the dashboard without manual intervention.
+    Also syncs the next 2 days for schedule visibility.
+
+    Returns:
+        dict: Summary of synced games with counts and any errors
+    """
+    logger.info("Starting sync_new_day_games task (midnight sync)")
+    service = get_sync_service()
+    leagues = ["NFL", "NBA", "MLB", "NHL"]
+    today = timezone.now().date()
+    results = {"synced": 0, "errors": [], "date": str(today)}
+
+    # Sync today + next 2 days
+    dates_to_sync = [today + timedelta(days=i) for i in range(3)]
+
+    for league in leagues:
+        for date in dates_to_sync:
+            try:
+                logger.info(f"Syncing {league} games for {date}")
+                games = service.sync_games(league, date)
+                results["synced"] += len(games)
+                logger.info(f"Synced {len(games)} {league} games for {date}")
+            except Exception as e:
+                error_msg = f"Error syncing {league} on {date}: {str(e)}"
+                logger.error(error_msg)
+                results["errors"].append(error_msg)
+
+    logger.info(
+        f"Completed sync_new_day_games: {results['synced']} games synced, {len(results['errors'])} errors"
+    )
+    return results
+
+
+@shared_task(
+    bind=True,
+    autoretry_for=(Exception,),
     retry_kwargs={"max_retries": 2, "countdown": 300},
     time_limit=1800,  # 30 minutes
 )
