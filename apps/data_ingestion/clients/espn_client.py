@@ -656,6 +656,7 @@ class ESPNClient:
     def parse_team_roster(self, data: Dict[str, Any], team_id: str) -> Dict[str, Any]:
         """
         Parse team roster data into normalized format.
+        Handles both NBA format (flat array) and NFL/NHL/MLB format (grouped by position).
 
         Args:
             data: Raw roster data from ESPN API
@@ -665,8 +666,19 @@ class ESPNClient:
             Dictionary with list of athletes/players
         """
         athletes = []
+        raw_athletes = data.get('athletes', [])
         
-        for athlete_data in data.get('athletes', []):
+        # Check if this is NBA format (flat array of athletes) or NFL/NHL/MLB (grouped by position)
+        if raw_athletes and isinstance(raw_athletes[0], dict):
+            # Check if first item has 'items' key (grouped format) or athlete data directly
+            if 'items' in raw_athletes[0]:
+                # NFL/NHL/MLB format - athletes grouped by position category
+                all_athletes = []
+                for position_group in raw_athletes:
+                    all_athletes.extend(position_group.get('items', []))
+                raw_athletes = all_athletes
+        
+        for athlete_data in raw_athletes:
             try:
                 position = athlete_data.get('position', {})
                 headshot = None
