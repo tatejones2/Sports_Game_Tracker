@@ -53,6 +53,7 @@ class ESPNClient:
         'scheduled': 3600,   # 1 hour for scheduled games
         'final': 86400,      # 24 hours for final games
         'teams': 604800,     # 1 week for team data
+        'standings': 3600,   # 1 hour for standings data
     }
 
     def __init__(self, timeout: int = 10, max_retries: int = 3):
@@ -421,6 +422,63 @@ class ESPNClient:
             params['season'] = season
         
         return self._make_request(endpoint, **params)
+
+    def get_standings(self, league: str, season: Optional[int] = None) -> Dict[str, Any]:
+        """
+        Get current standings for a league.
+
+        Args:
+            league: League abbreviation (e.g., 'NFL', 'NBA')
+            season: Season year (None = current)
+
+        Returns:
+            Standings data
+
+        Raises:
+            ESPNAPIError: If request fails or league is invalid
+        """
+        if league not in self.SPORT_MAPPINGS:
+            raise ESPNAPIError(f"Unsupported league: {league}")
+        
+        mapping = self.SPORT_MAPPINGS[league]
+        # Use the /apis/v2/ endpoint which has actual standings data
+        url = f"https://site.api.espn.com/apis/v2/sports/{mapping['sport']}/{mapping['league']}/standings"
+        
+        params = {}
+        if season:
+            params['season'] = season
+        
+        cache_key = self._get_cache_key(f"standings_{league}", **params)
+        
+        # Check cache first
+        cached_response = cache.get(cache_key)
+        if cached_response:
+            logger.debug(f"Cache hit for standings {league}")
+            return cached_response
+        
+        # Make request
+        try:
+            logger.info(f"Making request to {url} with params {params}")
+            response = self.session.get(url, params=params, timeout=self.timeout)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            # Cache response
+            cache.set(cache_key, data, self.CACHE_DURATIONS['standings'])
+            logger.debug(f"Cached response for {cache_key} ({self.CACHE_DURATIONS['standings']}s)")
+            
+            return data
+            
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                raise ESPNRateLimitError("Rate limit exceeded") from e
+            raise ESPNAPIError(f"HTTP error: {e}") from e
+        except requests.exceptions.RequestException as e:
+            raise ESPNAPIError(f"Request failed: {e}") from e
+        except ValueError as e:
+            raise ESPNAPIError(f"Invalid JSON response: {e}") from e
+
 
     def normalize_status(self, espn_status: str) -> str:
         """

@@ -85,7 +85,6 @@
                                 {{ team.ties }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-                                {% widthratio team.wins 1 100 %}
                                 {% widthratio team.wins|add:team.losses|add:team.ties 1 1 as total_games %}
                                 {% if total_games > 0 %}
                                     {% widthratio team.wins total_games 1000 as win_pct_raw %}

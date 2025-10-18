@@ -98,18 +98,35 @@ class SyncService:
         updated = 0
 
         try:
-            teams_data = self.espn_client.get_teams(league_abbr.lower())
+            response = self.espn_client.get_teams(league_abbr.upper())
+            teams_data = response.get('sports', [{}])[0].get('leagues', [{}])[0].get('teams', [])
 
-            for team_data in teams_data:
+            for team_wrapper in teams_data:
+                team_data = team_wrapper.get('team', {})
+                # Extract record data
+                record = team_data.get('record', {}).get('items', [{}])[0] if team_data.get('record', {}).get('items') else {}
+                stats = record.get('stats', []) if record else []
+                wins = 0
+                losses = 0
+                ties = 0
+                for stat in stats:
+                    if stat.get('name') == 'wins':
+                        wins = int(stat.get('value', 0))
+                    elif stat.get('name') == 'losses':
+                        losses = int(stat.get('value', 0))
+                    elif stat.get('name') == 'ties':
+                        ties = int(stat.get('value', 0))
+                
                 team, is_created = Team.objects.update_or_create(
-                    external_id=team_data["id"],
+                    abbreviation=team_data["abbreviation"],
                     league=league,
                     defaults={
-                        "name": team_data["name"],
-                        "abbreviation": team_data["abbreviation"],
-                        "logo_url": team_data.get("logo"),
-                        "wins": team_data.get("wins", 0),
-                        "losses": team_data.get("losses", 0),
+                        "external_id": team_data["id"],
+                        "name": team_data["displayName"],
+                        "logo_url": team_data.get("logos", [{}])[0].get("href") if team_data.get("logos") else None,
+                        "wins": wins,
+                        "losses": losses,
+                        "ties": ties,
                     },
                 )
                 if is_created:
@@ -472,3 +489,105 @@ class SyncService:
             results[team.full_name] = self.sync_team_roster(team)
         
         return results
+
+    @transaction.atomic
+    def sync_standings(self, league_abbr: str) -> Tuple[int, int]:
+        """
+        Sync standings data for a specific league.
+
+        Args:
+            league_abbr: League abbreviation (e.g., 'NFL', 'NBA')
+
+        Returns:
+            Tuple of (teams_updated, teams_not_found)
+        """
+        league = League.objects.get(abbreviation=league_abbr)
+        updated = 0
+        not_found = 0
+
+        try:
+            standings_data = self.espn_client.get_standings(league_abbr.upper())
+            
+            # ESPN standings structure varies by sport
+            # Try to find the teams in the standings data
+            teams_data = []
+            
+            # Check for different data structures
+            if 'children' in standings_data:
+                # NFL/NBA structure with divisions
+                for conference in standings_data.get('children', []):
+                    for standing in conference.get('standings', {}).get('entries', []):
+                        teams_data.append(standing)
+            elif 'standings' in standings_data:
+                # Alternative structure
+                for standing_group in standings_data.get('standings', []):
+                    teams_data.extend(standing_group.get('entries', []))
+            
+            # Process each team's standings
+            for entry in teams_data:
+                team_data = entry.get('team', {})
+                team_id = team_data.get('id')
+                
+                if not team_id:
+                    continue
+                
+                # Extract stats
+                stats = entry.get('stats', [])
+                wins = 0
+                losses = 0
+                ties = 0
+                games_played = 0
+                points_for = 0
+                points_against = 0
+                
+                for stat in stats:
+                    stat_name = stat.get('name', '').lower()
+                    stat_value = stat.get('value')
+                    
+                    # Skip stats with None values
+                    if stat_value is None:
+                        continue
+                    
+                    # Convert to int, handling floats
+                    try:
+                        stat_value = int(float(stat_value))
+                    except (ValueError, TypeError):
+                        continue
+                    
+                    if stat_name == 'wins':
+                        wins = stat_value
+                    elif stat_name == 'losses':
+                        losses = stat_value
+                    elif stat_name == 'ties':
+                        ties = stat_value
+                    elif stat_name == 'pointsfor':
+                        points_for = stat_value
+                    elif stat_name == 'pointsagainst':
+                        points_against = stat_value
+                
+                # Calculate games played from wins + losses + ties
+                games_played = wins + losses + ties
+                
+                # Find team by external_id
+                try:
+                    team = Team.objects.get(external_id=team_id, league=league)
+                    team.wins = wins
+                    team.losses = losses
+                    team.ties = ties
+                    team.games_played = games_played
+                    team.points_for = points_for
+                    team.points_against = points_against
+                    team.differential = points_for - points_against
+                    team.save()
+                    updated += 1
+                    logger.debug(f"Updated standings for {team.name}: {wins}-{losses}-{ties}")
+                except Team.DoesNotExist:
+                    logger.warning(f"Team with external_id {team_id} not found in {league_abbr}")
+                    not_found += 1
+            
+            logger.info(f"Synced {league_abbr} standings - Updated: {updated}, Not Found: {not_found}")
+            return updated, not_found
+
+        except Exception as e:
+            logger.error(f"Error syncing standings for {league_abbr}: {str(e)}")
+            raise

@@ -13,17 +13,17 @@ def dashboard(request):
     """
     Main dashboard showing overview of live games, today's schedule, and quick stats.
     """
-    today = timezone.now().date()
+    today = timezone.localtime(timezone.now()).date()
     
     # Get counts for stats cards
     live_count = Game.objects.filter(status='live').count()
-    today_count = Game.objects.filter(game_date=today).count()
+    today_count = Game.objects.filter(game_date__date=today).count()
     teams_count = Team.objects.count()
     leagues_count = League.objects.count()
     
     # Get today's games
     today_games = Game.objects.filter(
-        game_date=today
+        game_date__date=today
     ).select_related(
         'home_team', 'away_team', 'league'
     ).order_by('scheduled_time')
@@ -90,16 +90,16 @@ def schedule(request):
         try:
             selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
         except ValueError:
-            selected_date = timezone.now().date()
+            selected_date = timezone.localtime(timezone.now()).date()
     else:
-        selected_date = timezone.now().date()
+        selected_date = timezone.localtime(timezone.now()).date()
     
     # Get league filter
     league_id = request.GET.get('league')
     
     # Build query
     games_query = Game.objects.filter(
-        game_date=selected_date
+        game_date__date=selected_date
     ).select_related('home_team', 'away_team', 'league')
     
     if league_id:
